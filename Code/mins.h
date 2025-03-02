@@ -84,7 +84,7 @@ struct Brent : public Bracketmethod {
             if (abs(x - xm) <= (tol2 - 0.5 * (b - a))) {
                 fmin = fx;
                 xmin = x;
-                cout << "Number of iterations: " << iter << endl;
+                cout << "Number of Brent iterations: " << iter << endl;
                 return { xvals, fvals };
             }
 

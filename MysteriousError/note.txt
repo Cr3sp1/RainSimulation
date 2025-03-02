@@ -1,2 +1,0 @@
-There appears to be a mysterius error. The folder CodeErr contains an already compiled version of our code in which the bodies are not moved when calling the dynamic version of WetnessSmooth. 
-Recompiling with clang sometimes solves the issue, sometimes it doesen't. Recompiling with g++ so far has always solved the issue.
