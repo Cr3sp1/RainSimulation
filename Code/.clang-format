@@ -1,0 +1,7 @@
+BasedOnStyle: LLVM  # Start with an existing style (LLVM, Google, Chromium, etc.)
+IndentWidth: 4       # Number of spaces per indentation level (ignored if using tabs)
+UseTab: Always       # Always use tabs instead of spaces
+TabWidth: 4          # Number of spaces per tab
+PointerAlignment: Left  # Align pointers to the left
+ColumnLimit: 100     # Increase line length for readability
+ReflowComments: false  # Prevents `clang-format` from modifying comments
