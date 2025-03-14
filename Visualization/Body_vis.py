@@ -56,11 +56,12 @@ def plot_geometric_bodies(filename):
                 sphere(pos=point2, radius=radius, texture='stripes.png')
 
 # plot_geometric_bodies('../data/Temp/Vit.dat')
-plot_geometric_bodies('../data/Walk/Status/Walk0.000000.dat')
+plot_geometric_bodies('../data/Run/Status/RunStr0.750000.dat')
 
 
 # Adjust camera position and orientation
-scene.camera.pos = vector(0.414, -2.2, 1.3)
+# scene.camera.pos = vector(0.414, -2.2, 1.3)   # walk
+scene.camera.pos = vector(0.7, -2.2, 1.25)     # run
 scene.camera.axis = vector(0, 1, 0)
 scene.camera.up = vector(0, 0, 1)
 
