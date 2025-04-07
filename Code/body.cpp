@@ -26,8 +26,8 @@ void Body::Move(double T) {
 		delta += trans[2 * i + 1] * (cos(T * 2 * M_PI / (i + 1)) - cos(t * 2 * M_PI / (i + 1)));
 	}
 	// Translate
-	if (w.size() > 0)
-		rotcent += delta;
+	Translate(delta);
+
 
 	// Generate rotation matrix
 	vector<vector<double>> rotmat;
@@ -45,8 +45,10 @@ void Body::Move(double T) {
 	} else {
 		rotmat = IdMat(3);
 	}
+	// Rotate 
+	Rotate(rotcent, rotmat);
 
-	// Move sub-bodies
+	// Propagate motion to sub-bodies
 	for (Body* body : SubBodies)
 		body->BeMoved(delta, rotcent, rotmat);
 
@@ -57,12 +59,13 @@ void Body::Move(double T) {
 // the sub-bodie
 void Body::BeMoved(vector<double> Delta, vector<double> RotCent, vector<vector<double>> Rotmat) {
 	// Translate
-	if (w.size() != 0)
-		rotcent += Delta;
+	Translate(Delta);
 
 	// Rotate
+	Rotate(RotCent, Rotmat);
+	// Rotate frame of reference
 	if (w.size() != 0) {
-		Rotate(rotcent, RotCent, Rotmat);
+		RotatePoint(rotcent, RotCent, Rotmat);
 		rotax = Rotmat * rotax;
 	}
 	for (vector<double>& vec : trans)
@@ -109,75 +112,15 @@ double Sphere::CheckSmooth(Ray& ray, double dx) {
 	return smooth_w(delta_r, dx);
 }
 
-// Time evolution of the body in its own frame of reference, also propagates to the sub-bodies
-void Sphere::Move(double T) {
-	if (T == t)
-		return;
-
-	// Calculate the total translation for the step
-	vector<double> delta({0, 0, 0});
-	// Add sin terms
-	for (size_t i = 0; 2 * i < trans.size(); i++) {
-		delta += trans[2 * i] * (sin(T * 2 * M_PI / (i + 1)) - sin(t * 2 * M_PI / (i + 1)));
-	}
-	// Add cos terms
-	for (size_t i = 0; 2 * i + 1 < trans.size(); i++) {
-		delta += trans[2 * i + 1] * (cos(T * 2 * M_PI / (i + 1)) - cos(t * 2 * M_PI / (i + 1)));
-	}
-	// Translate
-	if (w.size() > 0)
-		rotcent += delta;
-	;
-	cent += delta;
-
-	// Generate rotation matrix
-	vector<vector<double>> rotmat;
-	if (w.size() > 0) {
-		double theta = 0;
-		// Add sin terms
-		for (size_t i = 0; 2 * i < w.size(); i++) {
-			theta += w[2 * i] * (sin(T * 2 * M_PI / (i + 1)) - sin(t * 2 * M_PI / (i + 1)));
-		}
-		// Add cos terms
-		for (size_t i = 0; 2 * i + 1 < w.size(); i++) {
-			theta += w[2 * i + 1] * (cos(T * 2 * M_PI / (i + 1)) - cos(t * 2 * M_PI / (i + 1)));
-		}
-		rotmat = RotMat(rotax, theta);
-	} else {
-		rotmat = IdMat(3);
-	}
-
-	// Rotate
-	Rotate(cent, rotcent, rotmat);
-
-	// Move sub-bodies
-	for (Body* body : SubBodies)
-		body->BeMoved(delta, rotcent, rotmat);
-
-	t = T;
+// Translates the sphere by Delta
+void Sphere::Translate(vector<double> Delta) { 
+	if (w.size() > 0) rotcent += Delta;
+	cent += Delta;
 }
 
-// Time evolution caused by the super-body, affects the whole frame of reference, also propagates to
-// the sub-bodie
-void Sphere::BeMoved(vector<double> Delta, vector<double> RotCent, vector<vector<double>> Rotmat) {
-	// Translate
-	if (w.size() != 0)
-		rotcent += Delta;
-	cent += Delta;
-
-	// Rotate
-	// Rotate
-	if (w.size() != 0) {
-		Rotate(rotcent, RotCent, Rotmat);
-		rotax = Rotmat * rotax;
-	}
-	for (vector<double>& vec : trans)
-		vec = Rotmat * vec;
-	Rotate(cent, RotCent, Rotmat);
-
-	// Move sub-bodies
-	for (Body* body : SubBodies)
-		body->BeMoved(Delta, RotCent, Rotmat);
+// Rotates the sphere around point Rot0 according to rotation matrix Rotmat
+void Sphere::Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) {
+	RotatePoint(cent, Rot0, Rotmat);
 }
 
 // Finds smallest box around body
@@ -235,78 +178,17 @@ double Parallelepiped::CheckSmooth(Ray& ray, double dx) {
 	return smooth_w(delta_r, dx);
 }
 
-// Time evolution of the body in its own frame of reference, also propagates to the sub-bodies
-void Parallelepiped::Move(double T) {
-	if (T == t)
-		return;
-
-	// Calculate the total translation for the step
-	vector<double> delta({0, 0, 0});
-	// Add sin terms
-	for (size_t i = 0; 2 * i < trans.size(); i++) {
-		delta += trans[2 * i] * (sin(T * 2 * M_PI / (i + 1)) - sin(t * 2 * M_PI / (i + 1)));
-	}
-	// Add cos terms
-	for (size_t i = 0; 2 * i + 1 < trans.size(); i++) {
-		delta += trans[2 * i + 1] * (cos(T * 2 * M_PI / (i + 1)) - cos(t * 2 * M_PI / (i + 1)));
-	}
-	// Translate
-	if (w.size() > 0)
-		rotcent += delta;
-	cent += delta;
-
-	// Generate rotation matrix
-	vector<vector<double>> rotmat;
-	if (w.size() > 0) {
-		double theta = 0;
-		// Add sin terms
-		for (size_t i = 0; 2 * i < w.size(); i++) {
-			theta += w[2 * i] * (sin(T * 2 * M_PI / (i + 1)) - sin(t * 2 * M_PI / (i + 1)));
-		}
-		// Add cos terms
-		for (size_t i = 0; 2 * i + 1 < w.size(); i++) {
-			theta += w[2 * i + 1] * (cos(T * 2 * M_PI / (i + 1)) - cos(t * 2 * M_PI / (i + 1)));
-		}
-		rotmat = RotMat(rotax, theta);
-	} else {
-		rotmat = IdMat(3);
-	}
-
-	// Rotate
-	for (vector<double>& point : side)
-		point = rotmat * point;
-	Rotate(cent, rotcent, rotmat);
-
-	// Move sub-bodies
-	for (Body* body : SubBodies)
-		body->BeMoved(delta, rotcent, rotmat);
-
-	t = T;
+// Translates the parallelepiped by Delta
+void Parallelepiped::Translate(vector<double> Delta) { 
+	if (w.size() > 0) rotcent += Delta;
+	cent += Delta;
 }
 
-// Time evolution caused by the super-body, affects the whole frame of reference, also propagates to
-// the sub-bodie
-void Parallelepiped::BeMoved(vector<double> Delta, vector<double> RotCent,
-							 vector<vector<double>> Rotmat) {
-	// Translate
-	if (w.size() != 0)
-		rotcent += Delta;
-	cent += Delta;
-
-	// Rotate
-	if (w.size() != 0) {
-		Rotate(rotcent, RotCent, Rotmat);
-		rotax = Rotmat * rotax;
-	}
-	for (vector<double>& vec : trans)
-		vec = Rotmat * vec;
+// Rotates the parallelepiped around point Rot0 according to rotation matrix Rotmat
+void Parallelepiped::Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) {
+	RotatePoint(cent, Rot0, Rotmat);
 	for (vector<double>& point : side)
 		point = Rotmat * point;
-	Rotate(cent, RotCent, Rotmat);
-
-	// Move sub-bodies
-	for (Body* body : SubBodies)
-		body->BeMoved(Delta, RotCent, Rotmat);
 }
 
 // Returns all 8 vertices of the parallelepiped
@@ -377,76 +259,17 @@ double Capsule::CheckSmooth(Ray& ray, double dx) {
 	return smooth_w(delta_r, dx);
 }
 
-// Time evolution of the body in its own frame of reference, also propagates to the sub-bodies
-void Capsule::Move(double T) {
-	if (T == t)
-		return;
-
-	// Calculate the total translation for the step
-	vector<double> delta({0, 0, 0});
-	// Add sin terms
-	for (size_t i = 0; 2 * i < trans.size(); i++) {
-		delta += trans[2 * i] * (sin(T * 2 * M_PI / (i + 1)) - sin(t * 2 * M_PI / (i + 1)));
-	}
-	// Add cos terms
-	for (size_t i = 0; 2 * i + 1 < trans.size(); i++) {
-		delta += trans[2 * i + 1] * (cos(T * 2 * M_PI / (i + 1)) - cos(t * 2 * M_PI / (i + 1)));
-	}
-	// Translate
-	if (w.size() > 0)
-		rotcent += delta;
-	l1 += delta;
-	l2 += delta;
-
-	// Generate rotation matrix
-	vector<vector<double>> rotmat;
-	if (w.size() > 0) {
-		double theta = 0;
-		// Add sin terms
-		for (size_t i = 0; 2 * i < w.size(); i++) {
-			theta += w[2 * i] * (sin(T * 2 * M_PI / (i + 1)) - sin(t * 2 * M_PI / (i + 1)));
-		}
-		// Add cos terms
-		for (size_t i = 0; 2 * i + 1 < w.size(); i++) {
-			theta += w[2 * i + 1] * (cos(T * 2 * M_PI / (i + 1)) - cos(t * 2 * M_PI / (i + 1)));
-		}
-		rotmat = RotMat(rotax, theta);
-	} else {
-		rotmat = IdMat(3);
-	}
-
-	// Rotate
-	Rotate(l1, rotcent, rotmat);
-	Rotate(l2, rotcent, rotmat);
-
-	// Move sub-bodies
-	for (Body* body : SubBodies)
-		body->BeMoved(delta, rotcent, rotmat);
-
-	t = T;
-}
-
-// Time evolution caused by the super-body, affects the whole frame of reference, also propagates to
-// the sub-bodie
-void Capsule::BeMoved(vector<double> Delta, vector<double> RotCent, vector<vector<double>> Rotmat) {
-	// Translate
-	if (w.size() != 0)
-		rotcent += Delta;
+// Translates the sphere by Delta
+void Capsule::Translate(vector<double> Delta) { 
+	if (w.size() > 0) rotcent += Delta;
 	l1 += Delta;
 	l2 += Delta;
+}
 
-	// Rotate
-	if (w.size() != 0) {
-		Rotate(rotcent, RotCent, Rotmat);
-		rotax = Rotmat * rotax;
-	}
-	for (vector<double>& vec : trans)
-		vec = Rotmat * vec;
-	Rotate(l1, RotCent, Rotmat);
-	Rotate(l2, RotCent, Rotmat);
-	// Move sub-bodies
-	for (Body* body : SubBodies)
-		body->BeMoved(Delta, RotCent, Rotmat);
+// Rotates the Capsule around point Rot0 according to rotation matrix Rotmat
+void Capsule::Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) {
+	RotatePoint(l1, Rot0, Rotmat);
+	RotatePoint(l2, Rot0, Rotmat);
 }
 
 // Finds smallest box around body
@@ -666,6 +489,19 @@ double ManyBody::CheckSmooth(Ray& ray, double dx) {
 			return w;
 	}
 	return w;
+}
+
+// Translates the sphere by Delta
+void ManyBody::Translate(vector<double> Delta) { 
+	if (w.size() > 0) rotcent += Delta;
+	for (Body* body : bodies)
+		body->Translate(Delta);
+}
+
+// Rotates the Capsule around point Rot0 according to rotation matrix Rotmat
+void ManyBody::Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) {
+	for (Body* body : bodies)
+		body->Rotate(Rot0, Rotmat);
 }
 
 // Time evolution of the body

@@ -230,7 +230,7 @@ vector<vector<double>> IdMat(unsigned int N) {
 	return idmat;
 }
 
-// Returns the rotation matrix
+// Returns matrix representing the rotation around axis of theta radians
 vector<vector<double>> RotMat(vector<double> axis, double theta) {
 	if (Norm(axis) == 0 or axis.size() != 3)
 		return IdMat(axis.size()); // Handle zero-length vector to avoid division by zero
@@ -248,7 +248,7 @@ vector<vector<double>> RotMat(vector<double> axis, double theta) {
 }
 
 // Rotates a Point relative to the point Rot0
-void Rotate(vector<double>& Point, const vector<double>& Rot0,
+void RotatePoint(vector<double>& Point, const vector<double>& Rot0,
 			const vector<vector<double>>& Rotmat) {
 	if (Rotmat == IdMat(3))
 		return;
@@ -492,6 +492,8 @@ tuple<double, double, double, double, double, double> ParabolicFit(vector<double
 	// Compute standard errors: sqrt(diag(sigma^2 * (X^T * X)^-1))
 	cout << " +-" << sqrt(sigma2 * XtX_inv[2][2]) << " +-" << sqrt(sigma2 * XtX_inv[1][1]) << " +-" << sqrt(sigma2 * XtX_inv[0][0]) << endl;
 
+	cout << "Correlation matrix:" << endl;
+	Print(XtX_inv);
 	// Evaluate parameters and errors
 	double k = beta[2];
 	double k_std = sqrt(sigma2 * XtX_inv[2][2]);

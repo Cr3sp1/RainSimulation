@@ -89,7 +89,7 @@ vector<vector<double>> IdMat(unsigned int N);
 vector<vector<double>> RotMat(vector<double> axis, double theta);
 
 // Rotates a Point relative to the point Rot0
-void Rotate(vector<double>& Point, const vector<double>& Rot0,
+void RotatePoint(vector<double>& Point, const vector<double>& Rot0,
 			const vector<vector<double>>& Rotmat);
 
 // Prints the shadow of a body at nstep different time steps in [tmin, tmax)
