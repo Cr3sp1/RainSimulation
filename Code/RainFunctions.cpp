@@ -475,7 +475,7 @@ tuple<double, double, double, double, double, double> ParabolicFit(vector<double
 
 	// Ensures that beta[2] != 0
 	if (beta[2] == 0) beta[2] = __DBL_EPSILON__;
-	cout << "a=" << beta[2] << " b=" << beta[1] << " c=" << beta[0] << endl;
+	// cout << "a=" << beta[2] << " b=" << beta[1] << " c=" << beta[0] << endl;
 
 	// Compute residuals
 	vector<double> residuals(n);
@@ -489,20 +489,29 @@ tuple<double, double, double, double, double, double> ParabolicFit(vector<double
 	for (double r : residuals) rss += r * r;
 	double sigma2 = rss / (n - 3);  // degrees of freedom: n - number of parameters
 
-	// Compute standard errors: sqrt(diag(sigma^2 * (X^T * X)^-1))
-	cout << " +-" << sqrt(sigma2 * XtX_inv[2][2]) << " +-" << sqrt(sigma2 * XtX_inv[1][1]) << " +-" << sqrt(sigma2 * XtX_inv[0][0]) << endl;
+	// // Compute standard errors: sqrt(diag(sigma^2 * (X^T * X)^-1))
+	// cout << " +-" << sqrt(sigma2 * XtX_inv[2][2]) << " +-" << sqrt(sigma2 * XtX_inv[1][1]) << " +-" << sqrt(sigma2 * XtX_inv[0][0]) << endl;
 
-	cout << "Correlation matrix:" << endl;
-	Print(XtX_inv);
 	// Evaluate parameters and errors
 	double k = beta[2];
-	double k_std = sqrt(sigma2 * XtX_inv[2][2]);
-	double x0 = -beta[1]*0.5/beta[2];
-	double x0_std = sqrt(sigma2 * (( pow( beta[1]/(4* beta[2]*beta[2] ), 2)* XtX_inv[2][2]) +
-	(pow( 1/(2* beta[2]), 2)* XtX_inv[1][1]) ) );
+	double x0 = -beta[1]/(2*beta[2]);
 	double y0 = beta[0] - beta[1]*beta[1]/(4*beta[2]);
-	double y0_std = sqrt( sigma2*(pow( beta[1]*beta[1]/(4*beta[2]*beta[2]), 2)*XtX_inv[2][2] + 
-	pow(beta[1]/(2*beta[2]), 2)*XtX_inv[1][1] + XtX_inv[0][0]) );
+
+	// Evaluate partial derivatives
+	double dx0_db2 = beta[1]/(2*beta[2]*beta[2]);
+	double dx0_db1 = -1/(2*beta[2]);
+	double dy0_db2 = beta[1]*beta[1]/(4*beta[2]*beta[2]);
+	double dy0_db1 = -beta[1]/(2*beta[2]);
+	double dy0_db0 = 1;
+
+	// Evaluate erroros via error propagation
+	double k_std = sqrt(sigma2 * XtX_inv[2][2]);
+	double x0_std = sqrt(sigma2 * ( ( dx0_db2*dx0_db2*XtX_inv[2][2]) +
+		dx0_db1*dx0_db1*XtX_inv[1][1] + 2*dx0_db2*dx0_db1*XtX_inv[2][1]) );
+	double y0_std = sqrt( sigma2*( dy0_db2*dy0_db2*XtX_inv[2][2] + 
+		dy0_db1*dy0_db1*XtX_inv[1][1] + dy0_db0*dy0_db0*XtX_inv[0][0] +
+		2*dy0_db2*dy0_db1*XtX_inv[2][1] + 2*dy0_db1*dy0_db0*XtX_inv[1][0] + 
+		2*dy0_db0*dy0_db2*XtX_inv[0][2] ) );
 
 	// Return both parameters and errors
 	return make_tuple(k, k_std, x0, x0_std, y0, y0_std);
