@@ -169,9 +169,9 @@ vector<vector<double>> SimulateNstepSmooth(vector<double> box, Body& body, vecto
 										   unsigned int nstep_min, unsigned int nstep_max,
 										   unsigned int N_nstep);
 
-// Fits points with a parabola y = ax^2 + bx + c, using least squares minimization, and returns a
-// tuple containing (a, b, c)
-tuple<double, double, double> QuadraticRegression(vector<double> x_vals, vector<double> y_vals);
+// Fits points with a parabola y = k(x - x0)^2 + y0, using least squares minimization, and returns a
+// tuple containing (k, k_std, x0, x0_std, y0, y0_std)
+tuple<double, double, double, double, double, double> ParabolicFit(vector<double> x_vals, vector<double> y_vals);
 
 // Finds minimums of smooth wetness using Brent algorithm,calculates wetness for n_fit values spaced
 // dv around it, and returns two vectors, the first containing the values of vb and the second the

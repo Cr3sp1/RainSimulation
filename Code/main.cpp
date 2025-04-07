@@ -77,6 +77,14 @@ int main(int argc, char* argv[]) {
 	cout << "Still: " << WetnessSmooth(boxW, Walk, {0.5, 0.15, -1}, 0.60, 0.01) << endl;
 	cout << "Moving: " << WetnessSmooth(boxW, Walk, {0.5, 0.15, -1}, 0.60, 0.01, 0, 1, 50) << endl;
 
+	vector<double> xvals = {0.527597544676, 0.533597544676, 0.539597544676, 0.545597544676, 0.551597544676, 0.557597544676, 0.563597544676, 0.569597544676, 0.575597544676};
+	vector<double> yvals = {0.275558641137, 0.274978363346, 0.274540687724, 0.274320061991, 0.274269575173, 0.274416523185, 0.274495088069, 0.274676297277, 0.274945440353};
+	double k, k_std, x0, x0_std, y0, y0_std;
+	tie(k, k_std, x0, x0_std, y0, y0_std) = ParabolicFit( xvals, yvals);
+	cout << "k = "+ to_string(k) + " +- " + to_string(k_std) << endl;
+	cout << "vopt = "+ to_string(x0) + " +- " + to_string(x0_std) << endl;
+	cout << "R0 = "+ to_string(y0) + " +- " + to_string(y0_std) << endl;
+
 	// // Check boxes
 	// PrintDynShadow(boxW, Walk, {0, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_xy");
 	// PrintDynShadow(boxW, Walk, {0, -100, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_xz");
@@ -442,17 +450,17 @@ int main(int argc, char* argv[]) {
 
 
 	// Running with straight torso
-	int N_vtail = 50;
-	N_fit = 9;
-	dv = 0.006;
-	dx = 0.001;
-	nstep_t = 50;
-	ManyBody RunStr("../Bodies/RunningStraight.in");
-	// PrintDynState(RunStr, 0, 1, 60, "../data/Run/Status/RunStr");
+	// int N_vtail = 50;
+	// N_fit = 9;
+	// dv = 0.006;
+	// dx = 0.001;
+	// nstep_t = 50;
+	// ManyBody RunStr("../Bodies/RunningStraight.in");
+	// // PrintDynState(RunStr, 0, 1, 60, "../data/Run/Status/RunStr");
 
-	// results = FindMinFitSmooth(boxR, RunStr, 0., 2., dx, nstep_t, 0., 0., 2, N_vtail, N_fit, dv);
-	// Print("../data/Run/OptFitSmoothRSTR0.dat", results, 12);
+	// // results = FindMinFitSmooth(boxR, RunStr, 0., 2., dx, nstep_t, 0., 0., 2, N_vtail, N_fit, dv);
+	// // Print("../data/Run/OptFitSmoothRSTR0.dat", results, 12);
 
-	results = FindMinFitSmooth(boxR, RunStr, 0., 2., dx, nstep_t, 0.3, 0., 2, N_vtail, N_fit, dv);
-	Print("../data/Run/OptFitSmoothRSTR030.dat", results, 12);
+	// results = FindMinFitSmooth(boxR, RunStr, 0., 2., dx, nstep_t, 0.3, 0., 2, N_vtail, N_fit, dv);
+	// Print("../data/Run/OptFitSmoothRSTR030.dat", results, 12);
 }

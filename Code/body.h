@@ -55,6 +55,10 @@ class Body {
 	// Returns a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at
 	// least a distance dx from the body, 1 if the ray is at least dx inside the body
 	virtual double CheckSmooth(Ray& ray, double dx) { return 0.; }
+	// Translates the body
+	virtual void Translate(vector<double> Delta);
+	// Rotates the body
+	virtual void Rotate(vector<double> Delta);
 	// Time evolution of the body in its own frame of reference, also propagates to the sub-bodies
 	virtual void Move(double T);
 	// Time evolution caused by the super-body, affects the whole frame of reference, also

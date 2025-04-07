@@ -450,9 +450,9 @@ vector<vector<double>> SimulateNstepSmooth(vector<double> box, Body& body, vecto
 	return Transpose(vector<vector<double>>{nstep, vb, wetness});
 }
 
-// Fits points with a parabola y = ax^2 + bx + c, using least squares minimization, and returns a
-// tuple containing (a, b, c)
-tuple<double, double, double> QuadraticRegression(vector<double> x_vals, vector<double> y_vals) {
+// Fits points with a parabola y = k(x - x0)^2 + y0, using least squares minimization, and returns a
+// tuple containing (k, k_std, x0, x0_std, y0, y0_std)
+tuple<double, double, double, double, double, double> ParabolicFit(vector<double> x_vals, vector<double> y_vals) {
 	size_t n = x_vals.size();
 	assert(y_vals.size() == n && "Number of x and y values must be equal!");
 
@@ -464,11 +464,46 @@ tuple<double, double, double> QuadraticRegression(vector<double> x_vals, vector<
 		}
 	}
 
-	// Evaluate coefficients
+	// Transpose X
 	vector<vector<double>> X_t = Transpose(X);
-	vector<double> beta = Inverse(X_t * X) * X_t * y_vals;
 
-	return make_tuple(beta[2], beta[1], beta[0]);
+	// Compute (X^T * X)^(-1)
+	vector<vector<double>> XtX_inv = Inverse(X_t * X);
+
+	// Evaluate coefficients of y =  beta[0] + beta[1] * x + beta[2] * x^2
+	vector<double> beta = XtX_inv * X_t * y_vals;
+
+	// Ensures that beta[2] != 0
+	if (beta[2] == 0) beta[2] = __DBL_EPSILON__;
+	cout << "a=" << beta[2] << " b=" << beta[1] << " c=" << beta[0] << endl;
+
+	// Compute residuals
+	vector<double> residuals(n);
+	for (size_t i = 0; i < n; ++i) {
+		double y_pred = beta[0] + beta[1] * x_vals[i] + beta[2] * x_vals[i] * x_vals[i];
+		residuals[i] = y_vals[i] - y_pred;
+	}
+
+	// Estimate variance of residuals (sigma^2)
+	double rss = 0.0;
+	for (double r : residuals) rss += r * r;
+	double sigma2 = rss / (n - 3);  // degrees of freedom: n - number of parameters
+
+	// Compute standard errors: sqrt(diag(sigma^2 * (X^T * X)^-1))
+	cout << " +-" << sqrt(sigma2 * XtX_inv[2][2]) << " +-" << sqrt(sigma2 * XtX_inv[1][1]) << " +-" << sqrt(sigma2 * XtX_inv[0][0]) << endl;
+
+	// Evaluate parameters and errors
+	double k = beta[2];
+	double k_std = sqrt(sigma2 * XtX_inv[2][2]);
+	double x0 = -beta[1]*0.5/beta[2];
+	double x0_std = sqrt(sigma2 * (( pow( beta[1]/(4* beta[2]*beta[2] ), 2)* XtX_inv[2][2]) +
+	(pow( 1/(2* beta[2]), 2)* XtX_inv[1][1]) ) );
+	double y0 = beta[0] - beta[1]*beta[1]/(4*beta[2]);
+	double y0_std = sqrt( sigma2*(pow( beta[1]*beta[1]/(4*beta[2]*beta[2]), 2)*XtX_inv[2][2] + 
+	pow(beta[1]/(2*beta[2]), 2)*XtX_inv[1][1] + XtX_inv[0][0]) );
+
+	// Return both parameters and errors
+	return make_tuple(k, k_std, x0, x0_std, y0, y0_std);
 }
 
 // Finds minimums of smooth wetness using Brent algorithm,calculates wetness for n_fit values spaced
@@ -503,27 +538,23 @@ tuple<vector<double>, vector<double>> MinFitSmooth(vector<double> box, Body& bod
 		int n_half = n_fit / 2;
 		bool moving_forward = false, moving_backwards = false;
 		for (int iter = 0; iter < max_iter; iter++) {
-			double a_fit, b_fit, c_fit, min_fit;
-			tie(a_fit, b_fit, c_fit) = QuadraticRegression(vb, wetness);
+			double k, k_std, vopt, vopt_std, Rmin, Rmin_std;
+			tie(k, k_std, vopt, vopt_std, Rmin, Rmin_std) = ParabolicFit(vb, wetness);
 
-			min_fit = (a_fit != 0)
-						  ? -b_fit / (2 * a_fit)
-						  : -sgn(b_fit) * 2 * vmax; // moving towards -sgn(b_fit)*2*vmax means
-													// moving following first derivative
 
 			// Avoid following minimum outside of range
-			if (a_fit > 0 && (min_fit <= vmin || min_fit >= vmax)) {
+			if (k > 0 && (vopt <= vmin || vopt >= vmax)) {
 				break;
 			}
 
-			// Find number of values of x that are lower (and higher) than min_fit
+			// Find number of values of vb that are lower (and higher) than vopt
 			int n_lower = 0;
-			while (n_lower < n_fit && vb[n_lower] < min_fit)
+			while (n_lower < n_fit && vb[n_lower] < vopt)
 				n_lower++;
 			int n_higher = n_fit - n_lower;
 
-			// Account for failed fit, if a_fit < 0 move in  opposite direction
-			if (a_fit < 0)
+			// Account for failed fit, if k < 0 move in  opposite direction
+			if (k < 0)
 				swap(n_lower, n_higher);
 
 			cout << "Iteration " << iter + 1 << ", n_lower = " << n_lower
