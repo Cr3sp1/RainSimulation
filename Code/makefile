@@ -6,14 +6,17 @@ MYLIBS = body.o ray.o RainFunctions.o
 main.exe: main.cpp ${MYLIBS}
 	$(CC) -o $@ $^ $(CFLAGS) 
 
-%.o : %.cpp
+%.o: %.cpp
 	$(CC) -c $< $(CFLAGS)
 
 run:
 	./main.exe
 
-clean :
+clean:
 	rm *.o main.exe
+
+format :
+	clang-format -i *.cpp *.h
  
 
 debug: CFLAGS = $(DEBUG_CFLAGS)

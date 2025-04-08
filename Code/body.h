@@ -56,7 +56,10 @@ class Body {
 	// least a distance dx from the body, 1 if the ray is at least dx inside the body
 	virtual double CheckSmooth(Ray& ray, double dx) { return 0.; }
 	// Translates the body by Delta
-	virtual void Translate(vector<double> Delta) { if (w.size() > 0) rotcent += Delta;}
+	virtual void Translate(vector<double> Delta) {
+		if (w.size() > 0)
+			rotcent += Delta;
+	}
 	// Rotates the body around point Rot0 according to rotation matrix Rotmat
 	virtual void Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) {}
 	// Time evolution of the body in its own frame of reference, also propagates to the sub-bodies

@@ -28,7 +28,6 @@ void Body::Move(double T) {
 	// Translate
 	Translate(delta);
 
-
 	// Generate rotation matrix
 	vector<vector<double>> rotmat;
 	if (w.size() > 0) {
@@ -45,7 +44,7 @@ void Body::Move(double T) {
 	} else {
 		rotmat = IdMat(3);
 	}
-	// Rotate 
+	// Rotate
 	Rotate(rotcent, rotmat);
 
 	// Propagate motion to sub-bodies
@@ -113,8 +112,9 @@ double Sphere::CheckSmooth(Ray& ray, double dx) {
 }
 
 // Translates the sphere by Delta
-void Sphere::Translate(vector<double> Delta) { 
-	if (w.size() > 0) rotcent += Delta;
+void Sphere::Translate(vector<double> Delta) {
+	if (w.size() > 0)
+		rotcent += Delta;
 	cent += Delta;
 }
 
@@ -179,8 +179,9 @@ double Parallelepiped::CheckSmooth(Ray& ray, double dx) {
 }
 
 // Translates the parallelepiped by Delta
-void Parallelepiped::Translate(vector<double> Delta) { 
-	if (w.size() > 0) rotcent += Delta;
+void Parallelepiped::Translate(vector<double> Delta) {
+	if (w.size() > 0)
+		rotcent += Delta;
 	cent += Delta;
 }
 
@@ -260,8 +261,9 @@ double Capsule::CheckSmooth(Ray& ray, double dx) {
 }
 
 // Translates the sphere by Delta
-void Capsule::Translate(vector<double> Delta) { 
-	if (w.size() > 0) rotcent += Delta;
+void Capsule::Translate(vector<double> Delta) {
+	if (w.size() > 0)
+		rotcent += Delta;
 	l1 += Delta;
 	l2 += Delta;
 }
@@ -492,8 +494,9 @@ double ManyBody::CheckSmooth(Ray& ray, double dx) {
 }
 
 // Translates the sphere by Delta
-void ManyBody::Translate(vector<double> Delta) { 
-	if (w.size() > 0) rotcent += Delta;
+void ManyBody::Translate(vector<double> Delta) {
+	if (w.size() > 0)
+		rotcent += Delta;
 	for (Body* body : bodies)
 		body->Translate(Delta);
 }

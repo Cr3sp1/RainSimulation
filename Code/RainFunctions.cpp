@@ -249,7 +249,7 @@ vector<vector<double>> RotMat(vector<double> axis, double theta) {
 
 // Rotates a Point relative to the point Rot0
 void RotatePoint(vector<double>& Point, const vector<double>& Rot0,
-			const vector<vector<double>>& Rotmat) {
+				 const vector<vector<double>>& Rotmat) {
 	if (Rotmat == IdMat(3))
 		return;
 	Point -= Rot0;
@@ -452,7 +452,8 @@ vector<vector<double>> SimulateNstepSmooth(vector<double> box, Body& body, vecto
 
 // Fits points with a parabola y = k(x - x0)^2 + y0, using least squares minimization, and returns a
 // tuple containing (k, k_std, x0, x0_std, y0, y0_std)
-tuple<double, double, double, double, double, double> ParabolicFit(vector<double> x_vals, vector<double> y_vals) {
+tuple<double, double, double, double, double, double> ParabolicFit(vector<double> x_vals,
+																   vector<double> y_vals) {
 	size_t n = x_vals.size();
 	assert(y_vals.size() == n && "Number of x and y values must be equal!");
 
@@ -474,7 +475,8 @@ tuple<double, double, double, double, double, double> ParabolicFit(vector<double
 	vector<double> beta = XtX_inv * X_t * y_vals;
 
 	// Ensures that beta[2] != 0
-	if (beta[2] == 0) beta[2] = __DBL_EPSILON__;
+	if (beta[2] == 0)
+		beta[2] = __DBL_EPSILON__;
 	// cout << "a=" << beta[2] << " b=" << beta[1] << " c=" << beta[0] << endl;
 
 	// Compute residuals
@@ -486,32 +488,34 @@ tuple<double, double, double, double, double, double> ParabolicFit(vector<double
 
 	// Estimate variance of residuals (sigma^2)
 	double rss = 0.0;
-	for (double r : residuals) rss += r * r;
-	double sigma2 = rss / (n - 3);  // degrees of freedom: n - number of parameters
+	for (double r : residuals)
+		rss += r * r;
+	double sigma2 = rss / (n - 3); // degrees of freedom: n - number of parameters
 
 	// // Compute standard errors: sqrt(diag(sigma^2 * (X^T * X)^-1))
 	// cout << " +-" << sqrt(sigma2 * XtX_inv[2][2]) << " +-" << sqrt(sigma2 * XtX_inv[1][1]) << " +-" << sqrt(sigma2 * XtX_inv[0][0]) << endl;
 
 	// Evaluate parameters and errors
 	double k = beta[2];
-	double x0 = -beta[1]/(2*beta[2]);
-	double y0 = beta[0] - beta[1]*beta[1]/(4*beta[2]);
+	double x0 = -beta[1] / (2 * beta[2]);
+	double y0 = beta[0] - beta[1] * beta[1] / (4 * beta[2]);
 
 	// Evaluate partial derivatives
-	double dx0_db2 = beta[1]/(2*beta[2]*beta[2]);
-	double dx0_db1 = -1/(2*beta[2]);
-	double dy0_db2 = beta[1]*beta[1]/(4*beta[2]*beta[2]);
-	double dy0_db1 = -beta[1]/(2*beta[2]);
+	double dx0_db2 = beta[1] / (2 * beta[2] * beta[2]);
+	double dx0_db1 = -1 / (2 * beta[2]);
+	double dy0_db2 = beta[1] * beta[1] / (4 * beta[2] * beta[2]);
+	double dy0_db1 = -beta[1] / (2 * beta[2]);
 	double dy0_db0 = 1;
 
 	// Evaluate erroros via error propagation
 	double k_std = sqrt(sigma2 * XtX_inv[2][2]);
-	double x0_std = sqrt(sigma2 * ( ( dx0_db2*dx0_db2*XtX_inv[2][2]) +
-		dx0_db1*dx0_db1*XtX_inv[1][1] + 2*dx0_db2*dx0_db1*XtX_inv[2][1]) );
-	double y0_std = sqrt( sigma2*( dy0_db2*dy0_db2*XtX_inv[2][2] + 
-		dy0_db1*dy0_db1*XtX_inv[1][1] + dy0_db0*dy0_db0*XtX_inv[0][0] +
-		2*dy0_db2*dy0_db1*XtX_inv[2][1] + 2*dy0_db1*dy0_db0*XtX_inv[1][0] + 
-		2*dy0_db0*dy0_db2*XtX_inv[0][2] ) );
+	double x0_std =
+		sqrt(sigma2 * ((dx0_db2 * dx0_db2 * XtX_inv[2][2]) + dx0_db1 * dx0_db1 * XtX_inv[1][1] +
+					   2 * dx0_db2 * dx0_db1 * XtX_inv[2][1]));
+	double y0_std = sqrt(
+		sigma2 * (dy0_db2 * dy0_db2 * XtX_inv[2][2] + dy0_db1 * dy0_db1 * XtX_inv[1][1] +
+				  dy0_db0 * dy0_db0 * XtX_inv[0][0] + 2 * dy0_db2 * dy0_db1 * XtX_inv[2][1] +
+				  2 * dy0_db1 * dy0_db0 * XtX_inv[1][0] + 2 * dy0_db0 * dy0_db2 * XtX_inv[0][2]));
 
 	// Return both parameters and errors
 	return make_tuple(k, k_std, x0, x0_std, y0, y0_std);
@@ -551,7 +555,6 @@ tuple<vector<double>, vector<double>> MinFitSmooth(vector<double> box, Body& bod
 		for (int iter = 0; iter < max_iter; iter++) {
 			double k, k_std, vopt, vopt_std, Rmin, Rmin_std;
 			tie(k, k_std, vopt, vopt_std, Rmin, Rmin_std) = ParabolicFit(vb, wetness);
-
 
 			// Avoid following minimum outside of range
 			if (k > 0 && (vopt <= vmin || vopt >= vmax)) {
