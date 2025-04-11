@@ -73,29 +73,83 @@ int main(int argc, char* argv[]) {
 	ManyBody DynSphere("../Bodies/DynamicSphere.in");
 	vector<double> boxDS = {1, 1, 2};
 
-	// Check that body is moving
-	cout << "Still: " << WetnessSmooth(boxW, Walk, {0.5, 0.15, -1}, 0.60, 0.01) << endl;
-	cout << "Moving: " << WetnessSmooth(boxW, Walk, {0.5, 0.15, -1}, 0.60, 0.01, 0, 1, 50) << endl;
+	// Try out
+	cout << "Walk: " << WetnessSmooth(boxW, Walk, {0.5, 0.15, -1}, 0.60, 0.01, 0, 1, 50) << endl;
+	cout << "Run: " << WetnessSmooth(boxR, Run, {0.5, 0.15, -1}, 0.60, 0.01, 0, 1, 50) << endl;
 
-	vector<double> xvals = {0.527597544676, 0.533597544676, 0.539597544676,
-							0.545597544676, 0.551597544676, 0.557597544676,
-							0.563597544676, 0.569597544676, 0.575597544676};
-	vector<double> yvals = {0.275558641137, 0.274978363346, 0.274540687724,
-							0.274320061991, 0.274269575173, 0.274416523185,
-							0.274495088069, 0.274676297277, 0.274945440353};
-	double k, k_std, x0, x0_std, y0, y0_std;
-	tie(k, k_std, x0, x0_std, y0, y0_std) = ParabolicFit(xvals, yvals);
-	cout << "k = " + to_string(k) + " +- " + to_string(k_std) << endl;
-	cout << "vopt = " + to_string(x0) + " +- " + to_string(x0_std) << endl;
-	cout << "R0 = " + to_string(y0) + " +- " + to_string(y0_std) << endl;
+	PrintDynShadow(boxW, Walk, {0, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_xy");
+	PrintDynShadow(boxW, Walk, {0, -100, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_xz");
+	PrintDynShadow(boxW, Walk, {-100, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_yz");
+	PrintDynShadow(boxR, Run, {0, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_xy");
+	PrintDynShadow(boxR, Run, {0, -100, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_xz");
+	PrintDynShadow(boxR, Run, {-100, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_yz");
+
+	// Check GetBox
+	double eps = 2*dx;
+	boxW = Walk.GetBox( 0, 1, 50, eps);
+	boxR = Run.GetBox( 0, 1, 50, eps);
+	cout << "Walk New: " << WetnessSmooth(boxW, Walk, {0.5, 0.15, -1}, 0.60, 0.01, 0, 1, 50) << endl;
+	cout << "Run New: " << WetnessSmooth(boxR, Run, {0.5, 0.15, -1}, 0.60, 0.01, 0, 1, 50) << endl;
+
+	PrintDynShadow(boxW, Walk, {0, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/NewWalk_xy");
+	PrintDynShadow(boxW, Walk, {0, -100, -1}, dx, 0, 1, 60, "../data/Walk/Proj/NewWalk_xz");
+	PrintDynShadow(boxW, Walk, {-100, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/NewWalk_yz");
+	PrintDynShadow(boxR, Run, {0, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/NewRun_xy");
+	PrintDynShadow(boxR, Run, {0, -100, -1}, dx, 0, 1, 60, "../data/Run/Proj/NewRun_xz");
+	PrintDynShadow(boxR, Run, {-100, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/NewRun_yz");
+
+	// vector<double> xvals = {0.527597544676, 0.533597544676, 0.539597544676,
+	// 						0.545597544676, 0.551597544676, 0.557597544676,
+	// 						0.563597544676, 0.569597544676, 0.575597544676};
+	// vector<double> yvals = {0.275558641137, 0.274978363346, 0.274540687724,
+	// 						0.274320061991, 0.274269575173, 0.274416523185,
+	// 						0.274495088069, 0.274676297277, 0.274945440353};
+	// double k, k_std, x0, x0_std, y0, y0_std;
+	// tie(k, k_std, x0, x0_std, y0, y0_std) = ParabolicFit(xvals, yvals);
+	// cout << "k = " + to_string(k) + " +- " + to_string(k_std) << endl;
+	// cout << "vopt = " + to_string(x0) + " +- " + to_string(x0_std) << endl;
+	// cout << "R0 = " + to_string(y0) + " +- " + to_string(y0_std) << endl;
+
+	// int N_vtail = 10;
+	// N_fit = 9;
+	// dv = 0.006;
+	// dx = 0.01;
+	// nstep_t = 10;
+
+	// results = FindMinFitSmooth(boxW, Walk, 0., 0.7, dx, nstep_t, 0., 0., 0.7, N_vtail, N_fit, dv);
+	// Print("../data/Temp/OptFitSmoothW0.dat", results, 12);
+
+
+	// results = FindMinFitSmooth(boxR, Run, 0., 2., dx, nstep_t, 0., 0., 2, N_vtail, N_fit, dv);
+	// Print("../data/Temp/OptFitSmoothR0.dat", results, 12);
+
+
+	// results = OptMapFitSmooth(boxW, Walk, 0, 0.7, dx, nstep_t, N_fit, dv, 0, 0.7, 5, 0, 0.40,
+	// 	5);
+	// Print("../data/Temp/OptMapFitSmoothW.dat", results, 12);
+
+	// results =
+	// 	OptMapFitSmooth(boxR, Run, 0, 2, dx, nstep_t, N_fit, dv, 0, 2, 5, 0, 1.2, 5);
+	// Print("../data/Temp/OptMapFitSmoothR.dat", results, 12);
+
+	// vector<double> low;
+	// vector<double> high;
+	// tie(low, high) = Walk.GetBounds(0, 1, 50);
+	// cout << "Walk: \n";
+	// Print(low);
+	// Print(high);
+	// tie(low, high) = Run.GetBounds(0, 1, 1);
+	// cout << "Run: \n";
+	// Print(low);
+	// Print(high);
 
 	// // Check boxes
-	// PrintDynShadow(boxW, Walk, {0, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_xy");
-	// PrintDynShadow(boxW, Walk, {0, -100, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_xz");
-	// PrintDynShadow(boxW, Walk, {-100, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_yz");
-	// PrintDynShadow(boxR, Run, {0, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_xy");
-	// PrintDynShadow(boxR, Run, {0, -100, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_xz");
-	// PrintDynShadow(boxR, Run, {-100, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_yz");
+	PrintDynShadow(boxW, Walk, {0, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_xy");
+	PrintDynShadow(boxW, Walk, {0, -100, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_xz");
+	PrintDynShadow(boxW, Walk, {-100, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_yz");
+	PrintDynShadow(boxR, Run, {0, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_xy");
+	PrintDynShadow(boxR, Run, {0, -100, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_xz");
+	PrintDynShadow(boxR, Run, {-100, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_yz");
 
 	// // Print dynamic state
 	// PrintDynState(Walk, 0, 1, 60, "../data/Walk/Status/Walk");

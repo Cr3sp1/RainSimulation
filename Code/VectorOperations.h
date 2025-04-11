@@ -46,6 +46,19 @@ template <typename T> inline vector<T> operator-(const vector<T>& a, const vecto
 }
 
 // ===============================================================================
+// Negation of a vector by component
+// ===============================================================================
+
+template <typename T> inline vector<T> operator-(const vector<T>& a) {
+	vector<T> result(a.size());
+
+	for (int i = 0; i < static_cast<int>(a.size()); i++)
+		result[i] = -a[i];
+
+	return result;
+}
+
+// ===============================================================================
 // Scalar product between two vectors
 // ===============================================================================
 

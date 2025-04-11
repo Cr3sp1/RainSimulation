@@ -151,7 +151,7 @@ void ProjSurface::PrintH(string outfile) {
 	fout.close();
 }
 
-// Returns an estimate of the projection of the body on the plane
+// Return an estimate of the projection of the body on the plane
 double ProjSurface::BodyProj(Body& body) {
 	unsigned int nhit = 0;
 	// cout << "Projecting on " << rays.size() << " rays" << endl;
@@ -166,7 +166,7 @@ double ProjSurface::BodyProj(Body& body) {
 	return nhit * dx * dx;
 }
 
-// Returns an estimate of the projection of the dynamic body on the plane
+// Return an estimate of the projection of the dynamic body on the plane
 double ProjSurface::BodyProj(Body& body, double tmin, double tmax, unsigned int nstep) {
 	if (nstep == 0)
 		return 0;
@@ -187,7 +187,7 @@ double ProjSurface::BodyProj(Body& body, double tmin, double tmax, unsigned int 
 	return nhit * dx * dx / nstep;
 }
 
-// Returns a smooth estimate of the projection of the body on the plane
+// Return a smooth estimate of the projection of the body on the plane
 double ProjSurface::BodyProjSmooth(Body& body) {
 	double tot_w = 0;
 	// cout << "Projecting on " << rays.size() << " rays" << endl;
@@ -201,7 +201,7 @@ double ProjSurface::BodyProjSmooth(Body& body) {
 	return tot_w * dx * dx;
 }
 
-// Returns a smooth estimate of the projection of the dynamic body on the plane
+// Return a smooth estimate of the projection of the dynamic body on the plane
 double ProjSurface::BodyProjSmooth(Body& body, double tmin, double tmax, unsigned int nstep) {
 	if (nstep == 0)
 		return 0;

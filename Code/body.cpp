@@ -75,11 +75,26 @@ void Body::BeMoved(vector<double> Delta, vector<double> RotCent, vector<vector<d
 		body->BeMoved(Delta, RotCent, Rotmat);
 }
 
-// Finds smallest box around body
-void Body::FindBox(vector<double>& min, vector<double>& max) {
-	if (min.size() != 3 or max.size() != 3) {
-		cout << "Error in FindBox: min and max must be of size 3" << endl;
-	}
+// Find smallest bounds containing the body throughout movement, return a vector containing lower
+// values of x, y, z and a vector containing higher values of x, y, z.
+tuple<vector<double>, vector<double>> Body::GetBounds(double tmin, double tmax, unsigned int nstep) {
+	vector<double> low = vector<double>(3, numeric_limits<double>::infinity());
+	vector<double> high = vector<double>(3, -numeric_limits<double>::infinity());
+	return make_tuple(low, high);
+}
+
+// Return box starting on origin that contains the body with allowance epsilon and move body in it
+vector<double> Body::GetBox(double tmin, double tmax, unsigned int nstep, double epsilon) {
+	// Get bounds
+	vector<double> low, high;
+	tie( low, high) = GetBounds( tmin, tmax, nstep);
+	low -= vector<double>(3, epsilon);
+	high += vector<double>(3, epsilon);
+
+	// Translate Body
+	Translate(-low);
+
+	return high - low;
 }
 
 // Prints to file the state of the body
@@ -103,7 +118,7 @@ bool Sphere::Check(Ray& ray) {
 	return false;
 }
 
-// Returns a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at least a
+// Return a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at least a
 // distance dx from the body, 1 if the ray is at least dx inside the body
 double Sphere::CheckSmooth(Ray& ray, double dx) {
 	vector<double> Xrel = ray.GetR0() - Hcent;
@@ -123,17 +138,26 @@ void Sphere::Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) {
 	RotatePoint(cent, Rot0, Rotmat);
 }
 
-// Finds smallest box around body
-void Sphere::FindBox(vector<double>& min, vector<double>& max) {
-	if (min.size() != 3 or max.size() != 3) {
-		cout << "Error in FindBox: min and max must be of size 3" << endl;
+// Find smallest bounds containing the sphere throughout movement, return a vector containing lower
+// values of x, y, z and a vector containing higher values of x, y, z.
+tuple<vector<double>, vector<double>> Sphere::GetBounds(double tmin, double tmax, unsigned int nstep) {
+	vector<double> low = vector<double>(3, numeric_limits<double>::infinity());
+	vector<double> high = vector<double>(3, -numeric_limits<double>::infinity());
+	if (nstep == 0)
+		return make_tuple(low, high);
+	double dt = (tmax - tmin) / nstep;
+
+	for (unsigned int i = 0; i < nstep; i++) {
+		double t = tmin + i * dt;
+		Move(t);
+		// Update bounds
+		for (size_t j = 0; j < 3; j++) {
+			low[j] = min(low[j], cent[j] - rad);
+			high[j] = max(high[j], cent[j] - rad);
+		}
 	}
-	for (size_t i = 0; i < 3; i++) {
-		if (cent[i] - rad < min[i])
-			min[i] = cent[i] - rad;
-		if (cent[i] + rad > max[i])
-			max[i] = cent[i] + rad;
-	}
+
+	return make_tuple(low, high);
 }
 
 // Prints to file the state of the body
@@ -163,7 +187,7 @@ bool Parallelepiped::Check(Ray& ray) {
 	return false;
 }
 
-// Returns a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at least a
+// Return a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at least a
 // distance dx from the body, 1 if the ray is at least dx inside the body
 double Parallelepiped::CheckSmooth(Ray& ray, double dx) {
 	// Finds smallest distance from all side of the hexagon
@@ -192,7 +216,7 @@ void Parallelepiped::Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) 
 		point = Rotmat * point;
 }
 
-// Returns all 8 vertices of the parallelepiped
+// Return all 8 vertices of the parallelepiped
 vector<vector<double>> Parallelepiped::GetVertices() {
 	vector<vector<double>> vertices{};
 	for (double i = -0.5; i <= 0.5; i++) {
@@ -205,20 +229,30 @@ vector<vector<double>> Parallelepiped::GetVertices() {
 	return vertices;
 }
 
-// Finds smallest box around body
-void Parallelepiped::FindBox(vector<double>& min, vector<double>& max) {
-	if (min.size() != 3 or max.size() != 3) {
-		cout << "Error in FindBox: min and max must be of size 3" << endl;
-	}
-	vector<vector<double>> vertices = GetVertices();
-	for (vector<double> vertex : vertices) {
-		for (size_t i = 0; i < 3; i++) {
-			if (vertex[i] < min[i])
-				min[i] = vertex[i];
-			if (vertex[i] > max[i])
-				max[i] = vertex[i];
+
+// Find smallest bounds containing the parallelepiped throughout movement, return a vector containing lower
+// values of x, y, z and a vector containing higher values of x, y, z.
+tuple<vector<double>, vector<double>> Parallelepiped::GetBounds(double tmin, double tmax, unsigned int nstep) {
+	vector<double> low = vector<double>(3, numeric_limits<double>::infinity());
+	vector<double> high = vector<double>(3, -numeric_limits<double>::infinity());
+	if (nstep == 0)
+		return make_tuple(low, high);
+	double dt = (tmax - tmin) / nstep;
+
+	for (unsigned int i = 0; i < nstep; i++) {
+		double t = tmin + i * dt;
+		Move(t);
+		// Update bounds
+		vector<vector<double>> vertices = GetVertices();
+		for (vector<double> vertex : vertices) {
+			for (size_t j = 0; j < 3; j++) {
+				low[j] = min(low[j], vertex[i]);
+				high[j] = max(high[j], vertex[i]);
+			}
 		}
 	}
+	
+	return make_tuple(low, high);
 }
 
 // Prints to file the state of the body
@@ -253,7 +287,7 @@ bool Capsule::Check(Ray& ray) {
 	return false;
 }
 
-// Returns a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at least a
+// Return a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at least a
 // distance dx from the body, 1 if the ray is at least dx inside the body
 double Capsule::CheckSmooth(Ray& ray, double dx) {
 	double delta_r = PointSegDist(ray.GetR0(), H1, H2) - rad;
@@ -274,23 +308,26 @@ void Capsule::Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) {
 	RotatePoint(l2, Rot0, Rotmat);
 }
 
-// Finds smallest box around body
-void Capsule::FindBox(vector<double>& min, vector<double>& max) {
-	if (min.size() != 3 or max.size() != 3) {
-		cout << "Error in FindBox: min and max must be of size 3" << endl;
+// Find smallest bounds containing the sphere throughout movement, return a vector containing lower
+// values of x, y, z and a vector containing higher values of x, y, z.
+tuple<vector<double>, vector<double>> Capsule::GetBounds(double tmin, double tmax, unsigned int nstep) {
+	vector<double> low = vector<double>(3, numeric_limits<double>::infinity());
+	vector<double> high = vector<double>(3, -numeric_limits<double>::infinity());
+	if (nstep == 0)
+		return make_tuple(low, high);
+	double dt = (tmax - tmin) / nstep;
+
+	for (unsigned int i = 0; i < nstep; i++) {
+		double t = tmin + i * dt;
+		Move(t);
+		// Update bounds
+		for (size_t j = 0; j < 3; j++) {
+			low[j] = min(min(low[j], l1[j] - rad), l2[j] - rad);
+			high[j] = max(max(low[j], l1[j] + rad), l2[j] + rad);
+		}
 	}
-	for (size_t i = 0; i < 3; i++) {
-		if (l1[i] - rad < min[i])
-			min[i] = l1[i] - rad;
-		if (l1[i] + rad > max[i])
-			max[i] = l1[i] + rad;
-	}
-	for (size_t i = 0; i < 3; i++) {
-		if (l2[i] - rad < min[i])
-			min[i] = l2[i] - rad;
-		if (l2[i] + rad > max[i])
-			max[i] = l2[i] + rad;
-	}
+
+	return make_tuple(low, high);
 }
 
 // Prints to file the state of the body
@@ -480,7 +517,7 @@ bool ManyBody::Check(Ray& ray) {
 	return false;
 }
 
-// Returns a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at least a
+// Return a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at least a
 // distance dx from the body, 1 if the ray is at least dx inside the body
 double ManyBody::CheckSmooth(Ray& ray, double dx) {
 	double w = 0;
@@ -518,7 +555,7 @@ void ManyBody::Move(double T) {
 	t = T;
 }
 
-// Returns a pointer to the body with that name in the ManyBody
+// Return a pointer to the body with that name in the ManyBody
 Body* ManyBody::Find(string name) {
 	for (Body* body : bodies)
 		if (body->GetName() == name)
@@ -542,14 +579,31 @@ void ManyBody::Attach(string SubName, string SuperName) {
 		Super->AddSubBody(*Sub);
 }
 
-// Finds smallest box around body
-void ManyBody::FindBox(vector<double>& min, vector<double>& max) {
-	if (min.size() != 3 or max.size() != 3) {
-		cout << "Error in FindBox: min and max must be of size 3" << endl;
+// Find smallest bounds containing the object throughout movement, return a vector containing lower
+// values of x, y, z and a vector containing higher values of x, y, z.
+tuple<vector<double>, vector<double>> ManyBody::GetBounds(double tmin, double tmax, unsigned int nstep) {
+	vector<double> low = vector<double>(3, numeric_limits<double>::infinity());
+	vector<double> high = vector<double>(3, -numeric_limits<double>::infinity());
+	if (nstep == 0)
+		return make_tuple(low, high);
+	double dt = (tmax - tmin) / nstep;
+
+	for (unsigned int i = 0; i < nstep; i++) {
+		double t = tmin + i * dt;
+		Move(t);
+		// Update bounds
+		for( Body* body : bodies ){
+			vector<double> bodyLow;
+			vector<double> bodyHigh;
+			tie(bodyLow, bodyHigh) = body->GetBounds( t, t, 1 );	// Get bounds without moving body
+			for( size_t j = 0; j < 3; j++ ){
+				low[j] = min(low[j], bodyLow[j]);
+				high[j] = max(high[j], bodyHigh[j]);
+			}
+		}
 	}
-	for (Body* body : bodies) {
-		body->FindBox(min, max);
-	}
+
+	return make_tuple(low, high);
 }
 
 // Prints to file the state (all the bodies and their parameters)

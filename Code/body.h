@@ -52,7 +52,7 @@ class Body {
 	virtual void Prime(vector<double> p, vector<double> v) {}
 	// Checks if the body is making contact with a ray
 	virtual bool Check(Ray& ray) { return false; }
-	// Returns a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at
+	// Return a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at
 	// least a distance dx from the body, 1 if the ray is at least dx inside the body
 	virtual double CheckSmooth(Ray& ray, double dx) { return 0.; }
 	// Translates the body by Delta
@@ -73,8 +73,11 @@ class Body {
 	virtual void AttachTo(Body& SupBody) { SupBody.AddSubBody(*this); }
 	// Get stuff
 	virtual string GetName() { return name; }
-	// Finds smallest box around the body
-	virtual void FindBox(vector<double>& min, vector<double>& max);
+	// Find smallest bounds containing the body throughout movement, return a vector containing lower
+	// values of x, y, z and a vector containing higher values of x, y, z.
+	virtual tuple<vector<double>, vector<double>> GetBounds(double tmin, double tmax, unsigned int nstep);
+	// Return box starting on origin that contains the body with allowance epsilon and move body in it
+	vector<double> GetBox(double tmin, double tmax, unsigned int nstep, double epsilon);
 	// Prints to file the state of the body
 	virtual void PrintState(ofstream& fout);
 	virtual void PrintState(string outfile);
@@ -101,7 +104,7 @@ class Sphere : public Body {
 	void Prime(vector<double> p, vector<double> v) override;
 	// Checks if the body is making contact with a ray and if so adds its the volume to the wetness
 	bool Check(Ray& ray) override;
-	// Returns a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at
+	// Return a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at
 	// least a distance dx from the body, 1 if the ray is at least dx inside the body
 	double CheckSmooth(Ray& ray, double dx) override;
 	// Translates the sphere by Delta
@@ -111,8 +114,9 @@ class Sphere : public Body {
 	// Gets stuff
 	vector<double> GetCent() { return cent; }
 	double GetRad() { return rad; }
-	// Finds smallest box around the body
-	void FindBox(vector<double>& min, vector<double>& max) override;
+	// Find smallest bounds containing the sphere throughout movement, return a vector containing lower
+	// values of x, y, z and a vector containing higher values of x, y, z.
+	tuple<vector<double>, vector<double>> GetBounds(double tmin, double tmax, unsigned int nstep) override;
 	// Prints to file the state of the body
 	void PrintState(ofstream& fout) override;
 	void PrintState(string outfile) override;
@@ -139,7 +143,7 @@ class Parallelepiped : public Body {
 	void Prime(vector<double> p, vector<double> v) override;
 	// Checks if the body is making contact with a ray
 	bool Check(Ray& ray) override;
-	// Returns a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at
+	// Return a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at
 	// least a distance dx from the body, 1 if the ray is at least dx inside the body
 	double CheckSmooth(Ray& ray, double dx) override;
 	// Translates the parallelepiped by Delta
@@ -150,8 +154,9 @@ class Parallelepiped : public Body {
 	vector<double> GetCent() { return cent; }
 	vector<vector<double>> GetSide() { return side; }
 	vector<vector<double>> GetVertices();
-	// Finds smallest box around the body
-	void FindBox(vector<double>& min, vector<double>& max) override;
+	// Find smallest bounds containing the parallelepiped throughout movement, return a vector containing
+	// lower values of x, y, z and a vector containing higher values of x, y, z.
+	tuple<vector<double>, vector<double>> GetBounds(double tmin, double tmax, unsigned int nstep) override;
 	// Prints to file the state of the body
 	void PrintState(ofstream& fout) override;
 	void PrintState(string outfile) override;
@@ -178,7 +183,7 @@ class Capsule : public Body {
 	void Prime(vector<double> p, vector<double> v) override;
 	// Checks if the body is making contact with a ray and if so adds its thevolume to the wetness
 	bool Check(Ray& ray) override;
-	// Returns a value in [0, 1] describing how close the ray is to the body, 0 ifthe ray is at
+	// Return a value in [0, 1] describing how close the ray is to the body, 0 ifthe ray is at
 	// least a distance dx from the body, 1 if the ray is at leastdx inside the body
 	double CheckSmooth(Ray& ray, double dx) override;
 	// Translates capsule body by Delta
@@ -189,8 +194,9 @@ class Capsule : public Body {
 	vector<double> GetL1() { return l1; }
 	vector<double> GetL2() { return l2; }
 	double GetRad() { return rad; }
-	// Finds smallest box around the body
-	void FindBox(vector<double>& min, vector<double>& max) override;
+	// Find smallest bounds containing the capsule throughout movement, return a vector containing
+	// lower values of x, y, z and a vector containing higher values of x, y, z.
+	tuple<vector<double>, vector<double>> GetBounds(double tmin, double tmax, unsigned int nstep) override;
 	// Prints to file the state of the body
 	void PrintState(ofstream& fout) override;
 	void PrintState(string outfile) override;
@@ -217,7 +223,7 @@ class ManyBody : public Body {
 	void Prime(vector<double> p, vector<double> v) override;
 	// Checks if the body is making contact with a ray and if so adds its thevolume to the wetness
 	bool Check(Ray& ray) override;
-	// Returns a value in [0, 1] describing how close the ray is to the body, 0 ifthe ray is at
+	// Return a value in [0, 1] describing how close the ray is to the body, 0 ifthe ray is at
 	// least a distance dx from the body, 1 if the ray is at leastdx inside the body
 	double CheckSmooth(Ray& ray, double dx) override;
 	// Translates all the bodies by Delta
@@ -241,8 +247,9 @@ class ManyBody : public Body {
 	// Attaches the sub-body to the super-body
 	void Attach(Body SubBody, string SuperName);
 	void Attach(string SubName, string SuperName);
-	// Finds smallest box around the body
-	void FindBox(vector<double>& min, vector<double>& max) override;
+	// Find smallest box containing the object throughout movement, return higher values of x, y, z. First
+	// translate the object so that lower values of x, y, z are all 0. Increase box dimensions by epsilon
+	tuple<vector<double>, vector<double>> GetBounds(double tmin, double tmax, unsigned int nstep) override;
 	// Prints to file the state (all the bodies and their parameters)
 	void PrintState(ofstream& fout) override;
 	void PrintState(string outfile) override;

@@ -19,7 +19,7 @@ struct Bracketmethod {
 	// Constructor with default tolerance
 	Bracketmethod(const double toll = 3.0e-8) : tol(toll) {}
 
-	// Bracket method, returns true if it finds b so that f(b)<f(a) and f(b)<f(c)
+	// Bracket method, return true if it finds b so that f(b)<f(a) and f(b)<f(c)
 	template <class T>
 	bool bracket(const double a, const double c, const unsigned int n_tries, T& func) {
 		ax = a + tol;
@@ -46,7 +46,7 @@ struct Brent : public Bracketmethod {
 	// Constructor with default tolerance
 	Brent(const double toll = 3.0e-8) : Bracketmethod(toll) {}
 
-	// Brent's minimization method, returns all the points evaluated in order of evaluation
+	// Brent's minimization method, return all the points evaluated in order of evaluation
 	template <class T> vector<vector<double>> minimize(T& func) {
 		vector<double> xvals = {ax, cx, bx};
 		vector<double> fvals = {fa, fc, fb};

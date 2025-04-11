@@ -97,16 +97,16 @@ class ProjSurface {
 	void PrintH(ofstream& fout);
 	void PrintH(string outfile);
 
-	// Returns an estimate of the projection of the body on the plane
+	// Return an estimate of the projection of the body on the plane
 	double BodyProj(Body& body);
 
-	// Returns an estimate of the projection of the dynamic body on the plane
+	// Return an estimate of the projection of the dynamic body on the plane
 	double BodyProj(Body& body, double tmin, double tmax, unsigned int nstep);
 
-	// Returns a smooth estimate of the projection of the body on the plane
+	// Return a smooth estimate of the projection of the body on the plane
 	double BodyProjSmooth(Body& body);
 
-	// Returns a smooth estimate of the projection of the dynamic body on the plane
+	// Return a smooth estimate of the projection of the dynamic body on the plane
 	double BodyProjSmooth(Body& body, double tmin, double tmax, unsigned int nstep);
 };
 
