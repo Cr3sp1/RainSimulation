@@ -73,30 +73,12 @@ int main(int argc, char* argv[]) {
 	ManyBody DynSphere("../Bodies/DynamicSphere.in");
 	vector<double> boxDS = {1, 1, 2};
 
-	// Try out
-	cout << "Walk: " << WetnessSmooth(boxW, Walk, {0.5, 0.15, -1}, 0.60, 0.01, 0, 1, 50) << endl;
-	cout << "Run: " << WetnessSmooth(boxR, Run, {0.5, 0.15, -1}, 0.60, 0.01, 0, 1, 50) << endl;
-
-	PrintDynShadow(boxW, Walk, {0, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_xy");
-	PrintDynShadow(boxW, Walk, {0, -100, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_xz");
-	PrintDynShadow(boxW, Walk, {-100, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_yz");
-	PrintDynShadow(boxR, Run, {0, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_xy");
-	PrintDynShadow(boxR, Run, {0, -100, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_xz");
-	PrintDynShadow(boxR, Run, {-100, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_yz");
-
 	// Check GetBox
 	double eps = 2*dx;
 	boxW = Walk.GetBox( 0, 1, 50, eps);
 	boxR = Run.GetBox( 0, 1, 50, eps);
 	cout << "Walk New: " << WetnessSmooth(boxW, Walk, {0.5, 0.15, -1}, 0.60, 0.01, 0, 1, 50) << endl;
 	cout << "Run New: " << WetnessSmooth(boxR, Run, {0.5, 0.15, -1}, 0.60, 0.01, 0, 1, 50) << endl;
-
-	PrintDynShadow(boxW, Walk, {0, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/NewWalk_xy");
-	PrintDynShadow(boxW, Walk, {0, -100, -1}, dx, 0, 1, 60, "../data/Walk/Proj/NewWalk_xz");
-	PrintDynShadow(boxW, Walk, {-100, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/NewWalk_yz");
-	PrintDynShadow(boxR, Run, {0, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/NewRun_xy");
-	PrintDynShadow(boxR, Run, {0, -100, -1}, dx, 0, 1, 60, "../data/Run/Proj/NewRun_xz");
-	PrintDynShadow(boxR, Run, {-100, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/NewRun_yz");
 
 	// vector<double> xvals = {0.527597544676, 0.533597544676, 0.539597544676,
 	// 						0.545597544676, 0.551597544676, 0.557597544676,
@@ -144,12 +126,12 @@ int main(int argc, char* argv[]) {
 	// Print(high);
 
 	// // Check boxes
-	PrintDynShadow(boxW, Walk, {0, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_xy");
-	PrintDynShadow(boxW, Walk, {0, -100, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_xz");
-	PrintDynShadow(boxW, Walk, {-100, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_yz");
-	PrintDynShadow(boxR, Run, {0, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_xy");
-	PrintDynShadow(boxR, Run, {0, -100, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_xz");
-	PrintDynShadow(boxR, Run, {-100, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_yz");
+	// PrintDynShadow(boxW, Walk, {0, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_xy");
+	// PrintDynShadow(boxW, Walk, {0, -100, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_xz");
+	// PrintDynShadow(boxW, Walk, {-100, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/Walk_yz");
+	// PrintDynShadow(boxR, Run, {0, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_xy");
+	// PrintDynShadow(boxR, Run, {0, -100, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_xz");
+	// PrintDynShadow(boxR, Run, {-100, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/Run_yz");
 
 	// // Print dynamic state
 	// PrintDynState(Walk, 0, 1, 60, "../data/Walk/Status/Walk");

@@ -33,10 +33,14 @@ ProjSurface::ProjSurface(vector<double> box, vector<double> vel, double Dx) : dx
 	// Generates the rays on a square grid along directions u1 and u2 (u1 and ud perpendicular and
 	// belonging to surface) cout << "Generating rays" << endl;
 	rays = {};
-	// cout << "dx = " << dx << endl;
-	vector<double> u1 = (Norm(H[5] - H[0]) > Norm(H[3] - H[0]))
-							? H[5] - H[0]
-							: H[3] - H[0]; // makes sure that u1 isn't infinitesimal
+
+	vector<double> u1 = H[1] - H[0];
+	// Makes sure that u1 isn't infinitesimal by taking the longest vector H[i] - H[0]
+	for( int i = 2; i <= 6; i++){
+		vector<double> temp = H[i] - H[0];
+		if (Norm(temp) > Norm(u1)) u1 = temp;
+	}
+
 	u1 = (u1 / Norm(u1)) * dx;
 	double maxu1 = MaxU(H, u1);
 	// cout << "|u1| = " << Norm(u1) << endl;
