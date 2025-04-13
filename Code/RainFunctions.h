@@ -7,6 +7,7 @@
 #include <iostream>
 #include <tuple>
 #include <vector>
+#include <ostream>
 
 #include "VectorOperations.h"
 #include "mins.h"
@@ -207,16 +208,10 @@ vector<vector<double>> OptMapFitSmooth(vector<double> box, Body& body, double vm
 									   double vcross_min, double vcross_max, unsigned int n_cross);
 
 
-// Write header file for results of minimization with varying vtail
-void WriteHeadMinFun( ofstream out, string bodyName, double vmax, double vcross, double dx, int nstep, int nfit, double dv );
-
-// Write header file for fit points of minimization with varying vtail
-void WriteHeadFitFun( ofstream out, string bodyName, double vmax, double vcross, double dx, int nstep, int nfit, double dv );
-
 // Write header file for results of minimization with varying vtail and vcross
-void WriteHeadMinMap( ofstream out, string bodyName, double vmax, double dx, int nstep, int nfit, double dv );
+void WriteHeadRes( ostream &out, string bodyName, double vmax, double dx, int nstep, int nfit, double dv );
 
 // Write header file for fit points of minimization with varying vtail and vcross
-void WriteHeadFitMap( ofstream out, string bodyName, double vmax, double dx, int nstep, int nfit, double dv );
+void WriteHeadFit( ostream &out, string bodyName, double vmax, double dx, int nstep, int nfit, double dv );
 
 #endif

@@ -74,6 +74,8 @@
         "__split_buffer": "cpp",
         "__tree": "cpp",
         "filesystem": "cpp",
-        "climits": "cpp"
+        "climits": "cpp",
+        "queue": "cpp",
+        "stack": "cpp"
     }
 }

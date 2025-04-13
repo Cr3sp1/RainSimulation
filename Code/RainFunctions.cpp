@@ -622,7 +622,7 @@ tuple<double, double, double, double, vector<vector<double>>> MinFitSmooth(vecto
 
 	vector<vector<double>> fitPoints = Transpose(vector<vector<double>> {vb, wetness });
 
-	return make_tuple(vopt,vopt_std, Rmin, Rmin_std, fitPoints);
+	return make_tuple(vopt, vopt_std, Rmin, Rmin_std, fitPoints);
 }
 
 // Finds minimums of smooth wetness for a fixed vcross and [vtail_min, vtail_max] using Brent
@@ -707,7 +707,7 @@ vector<vector<double>> OptMapFitSmooth(vector<double> box, Body& body, double vm
 		vector<vector<double>> res_i = FindMinFitSmooth(
 			box, body, vmax, dx, nstep, vcross_i, vtail_min, vtail_max, n_tail, nfit, dv);
 		
-		// Add vtail_i to each row
+		// Add vcross_i to each row
 		for (size_t i = 0; i < res_i.size(); ++i) {
 			res_i[i].insert(res_i[i].begin(), vcross_i);
 		}
@@ -721,39 +721,28 @@ vector<vector<double>> OptMapFitSmooth(vector<double> box, Body& body, double vm
 	return res;
 }
 
-// Write header file for results of minimization with varying vtail
-void WriteHeadMinFun( ofstream out, string bodyName, double vmax, double vcross, double dx, int nstep, int nfit, double dv ) {
-	out << "# Minimums of wetness found for the following parameters:\n";
-	out << "# Body = " + bodyName + ", vmax = " + to_string(vmax) + " vfall, vcross = " + to_string(vmax) + " vfall\n";
-	out << "# dx = " + to_string(dx) + "m, nstep = " + to_string(nstep) + "\n";
-	out << "# nfit" + to_string(nfit) + ", dv = " + to_string(dv) + " vfall\n";
-	out << "# Columns: vtail (vfall)\nvopt (vfall)\tvopt_std (vfall)\tRmin (m^2)\tRmin_std (m^2)" << endl;
-}
-
-// Write header file for fit points of minimization with varying vtail
-void WriteHeadFitFun( ofstream out, string bodyName, double vmax, double vcross, double dx, int nstep, int nfit, double dv ) {
-	out << "# Fit points used to estimate minimums of wetness found for the following parameters:\n";
-	out << "# Body = " + bodyName + ", vmax = " + to_string(vmax) + " vfall, vcross = " + to_string(vmax) + " vfall\n";
-	out << "# dx = " + to_string(dx) + "m, nstep = " + to_string(nstep) + "\n";
-	out << "# nfit" + to_string(nfit) + ", dv = " + to_string(dv) + " vfall\n";
-	out << "# Columns: vtail (vfall)\nvb (vfall)\t\tRb (m^2)" << endl;
-}
-
 // Write header file for results of minimization with varying vtail and vcross
-void WriteHeadMinMap( ofstream out, string bodyName, double vmax, double dx, int nstep, int nfit, double dv ){
+void WriteHeadRes( ostream &out, string bodyName, double vmax, double dx, int nstep, int nfit, double dv ){
+	out << "############################################################################################################\n";
 	out << "# Minimums of wetness found for the following parameters:\n";
-	out << "# Body = " + bodyName + ", vmax = " + to_string(vmax) + "\n";
-	out << "# dx = " + to_string(dx) + "m, nstep = " + to_string(nstep) + "\n";
-	out << "# nfit" + to_string(nfit) + ", dv = " + to_string(dv) + " vfall\n";
-	out << "# Columns: vtail (vfall)\nvcross (vfall)\nvopt (vfall)\tvopt_std (vfall)\tRmin (m^2)\tRmin_std (m^2)" << endl;
+	out << "# Body = " + bodyName + ", vmax = " << vmax << " vfall\n";
+	out << "# dx = " << dx << " m, nstep = " << nstep << "\n";
+	out << "# nfit = " << nfit << ", dv = " << dv << " vfall\n";
+	out << "# Columns:\n";
+	out << "# vcross (vfall)\tvtail (vfall)\tvopt (vfall)\tvopt_std (vfall)\tRmin (m^2)\tRmin_std (m^2)\n";
+	out << "############################################################################################################" << endl;
+
 }
 
 // Write header file for fit points of minimization with varying vtail and vcross
-void WriteHeadFitMap( ofstream out, string bodyName, double vmax, double dx, int nstep, int nfit, double dv ){
+void WriteHeadFit( ostream &out, string bodyName, double vmax, double dx, int nstep, int nfit, double dv ){
+	out << "############################################################################################################\n";
 	out << "# Fit points used to estimate minimums of wetness found for the following parameters:\n";
-	out << "# Body = " + bodyName + ", vmax = " + to_string(vmax) + "\n";
-	out << "# dx = " + to_string(dx) + "m, nstep = " + to_string(nstep) + "\n";
-	out << "# nfit" + to_string(nfit) + ", dv = " + to_string(dv) + " vfall\n";
-	out << "# Columns: vtail (vfall)\nvcross (vfall)\nvb (vfall)\t\tRb (m^2)" << endl;
+	out << "# Body = " + bodyName + ", vmax = " << vmax << " vfall\n";
+	out << "# dx = " << dx << " m, nstep = " << nstep << "\n";
+	out << "# nfit = " << nfit << ", dv = " << dv << " vfall\n";
+	out << "# Columns:\n";
+	out << "# vcross (vfall)\tvtail (vfall)\tvb (vfall)\tRb (m^2)\n";
+	out << "############################################################################################################" << endl;
 }
 

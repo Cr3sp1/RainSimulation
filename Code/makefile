@@ -1,6 +1,6 @@
 CC = clang++
-CFLAGS = -Wall -O3 --std=c++11 
-DEBUG_CFLAGS = -Wall -O3 --std=c++11 -pedantic -Winline -g
+CFLAGS = -Wall -O3 --std=c++17 
+DEBUG_CFLAGS = -Wall -O3 --std=c++17 -pedantic -Winline -g
 MYLIBS = body.o ray.o RainFunctions.o
 
 main.exe: main.cpp ${MYLIBS}

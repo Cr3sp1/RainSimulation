@@ -82,7 +82,7 @@ template <typename T> vector<T> Read(unsigned int size, char* filename) {
 	return v;
 }
 
-template <typename T> void Print(ofstream& fout, const vector<T>& v) {
+template <typename T> void Print(ostream& fout, const vector<T>& v) {
 	for (const auto& element : v) {
 		fout << element << "\t";
 	}
@@ -96,7 +96,7 @@ template <typename T> void Print(const vector<T>& v) {
 	cout << endl;
 }
 
-template <typename T> void Print(ofstream& fout, const vector<T>& v, unsigned int precision) {
+template <typename T> void Print(ostream& fout, const vector<T>& v, unsigned int precision) {
 	for (const auto& element : v) {
 		fout << setprecision(precision) << element << "\t";
 	}
@@ -111,7 +111,7 @@ template <typename T> void Print(const vector<T>& v, unsigned int precision) {
 }
 
 template <typename T>
-void Print(ofstream& fout, const vector<vector<T>>& matrix, unsigned int precision) {
+void Print(ostream& fout, const vector<vector<T>>& matrix, unsigned int precision) {
 	for (const auto& row : matrix) {
 		for (const auto& element : row) {
 			fout << setprecision(precision) << element << "\t";
@@ -127,7 +127,7 @@ void Print(string outfile, const vector<vector<T>>& matrix, unsigned int precisi
 	fout.close();
 }
 
-template <typename T> void Print(ofstream& fout, const vector<vector<T>>& matrix) {
+template <typename T> void Print(ostream& fout, const vector<vector<T>>& matrix) {
 	for (const auto& row : matrix) {
 		for (const auto& element : row) {
 			fout << element << "\t";
