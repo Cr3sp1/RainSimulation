@@ -55,8 +55,8 @@ int main(int argc, char* argv[]) {
 	cout << "Body = " + bodyName + ", vmax = " << vmax << " vfall\n";
 	cout << "dx = " << dx << " m, nstep = " << nstep << "\n";
 	cout << "nfit = " << nfit << ", dv = " << dv << " vfall\n";
-	cout << "vtail_min = " << vtail_min << ", vtail_max = " << vtail_max << " vfall, n_vtail = " << n_vtail << "\n";
-	cout << "vcross_min = " << vcross_min << ", vcross_max = " << vcross_max << " vfall, n_vcross = " << n_vcross << "\n";
+	cout << "vtail_min = " << vtail_min << " vfall, vtail_max = " << vtail_max << " vfall, n_vtail = " << n_vtail << "\n";
+	cout << "vcross_min = " << vcross_min << " vfall, vcross_max = " << vcross_max << " vfall, n_vcross = " << n_vcross << "\n";
 	cout << "Printing fit results to " + resPath + " and fit points to " + fitPath  + "\n";
 	cout << "##################################################################################################" << endl;
 
@@ -99,7 +99,6 @@ int main(int argc, char* argv[]) {
 		for(size_t j = 0; j < n_vtail; j++) {
 			double vtail_j =
 			n_vtail > 1 ? vtail_min + j * (vtail_max - vtail_min) / (n_vtail - 1) : vtail_min;
-			cout << vtail_j << endl;
 
 			double vopt, vopt_std, Rmin, Rmin_std;
 			vector<vector<double>> fitPoints;
@@ -115,9 +114,12 @@ int main(int argc, char* argv[]) {
 				fitPoints[i].insert(fitPoints[i].begin(), vcross_i);
 			}
 			Print( *outFit, fitPoints, 12);
+
+			cout << "Step " << i*n_vtail + j + 1 << "/" << n_vtail*n_vcross << " completed!";
 		}
 		
 
 	}
-	
+
+	cout << "All done!" << endl;
 }

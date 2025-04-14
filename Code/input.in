@@ -1,15 +1,15 @@
 ../Bodies/WalkingMan.in
 0.7
-0.05
-10
+0.001
+50
 9
 0.006
-0.0 0.7 10
-0.0 0.0 1
-../data/Temp/tryRes.dat
-../data/Temp/tryFit.dat
+0.3214285714 0.3357142857 2
+0.25 0.25 1
+../data/Walk/FunRes025Ex.dat
+../data/Walk/FunFit025Ex.dat
 
-  ReadInput >> bodyPath;                                  (path to the body input file)
+  	ReadInput >> bodyPath;                                  (path to the body input file)
 	ReadInput >> vmax;                                      (maximum velocity if the body, must be float > 0)
 	ReadInput >> dx;                                        (distance between rays, must be float > 0)
 	ReadInput >> nstep;                                     (number of time steps, must be int > 0)

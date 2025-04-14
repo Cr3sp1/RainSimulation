@@ -1,0 +1,8 @@
+############################################################################################################
+# Minimums of wetness found for the following parameters:
+# Body = WalkingMan.in, vmax = 0.7 vfall
+# dx = 0.001 m, nstep = 50
+# nfit = 9, dv = 0.006 vfall
+# Columns:
+# vcross (vfall)	vtail (vfall)	vopt (vfall)	vopt_std (vfall)	Rmin (m^2)	Rmin_std (m^2)
+############################################################################################################

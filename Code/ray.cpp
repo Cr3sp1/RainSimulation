@@ -72,7 +72,7 @@ ProjSurface::ProjSurface(vector<double> box, vector<double> vel, double Dx) : dx
 	// Sets the rain speed
 	Ray::V = vel;
 
-	cout << "Number of rays generated: " << rays.size() << endl;
+	// cout << "Number of rays generated: " << rays.size() << endl;
 }
 
 // Prints all the origins of the active rays to file
