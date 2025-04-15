@@ -51,7 +51,7 @@ struct Brent : public Bracketmethod {
 		vector<double> xvals = {ax, cx, bx};
 		vector<double> fvals = {fa, fc, fb};
 
-		cout << "a = " << ax << ", b = " << bx << ", c = " << cx << endl;
+		// cout << "a = " << ax << ", b = " << bx << ", c = " << cx << endl;
 
 		const int ITMAX = 100;			// Maximum number of iterations
 		const double CGOLD = 0.3819660; // Golden ratio
@@ -81,7 +81,7 @@ struct Brent : public Bracketmethod {
 			if (abs(x - xm) <= (tol2 - 0.5 * (b - a))) {
 				fmin = fx;
 				xmin = x;
-				cout << "Number of Brent iterations: " << iter << endl;
+				// cout << "Number of Brent iterations: " << iter << endl;
 				return {xvals, fvals};
 			}
 

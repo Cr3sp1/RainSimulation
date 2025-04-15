@@ -75,7 +75,8 @@ class Body {
 	virtual string GetName() { return name; }
 	// Find smallest bounds containing the body throughout movement, return a vector containing lower
 	// values of x, y, z and a vector containing higher values of x, y, z.
-	virtual tuple<vector<double>, vector<double>> GetBounds(double tmin, double tmax, unsigned int nstep);
+	virtual tuple<vector<double>, vector<double>> GetBounds(double tmin, double tmax,
+															unsigned int nstep);
 	// Return box starting on origin that contains the body with allowance epsilon and move body in it
 	vector<double> GetBox(double tmin, double tmax, unsigned int nstep, double epsilon);
 	// Prints to file the state of the body
@@ -116,7 +117,8 @@ class Sphere : public Body {
 	double GetRad() { return rad; }
 	// Find smallest bounds containing the sphere throughout movement, return a vector containing lower
 	// values of x, y, z and a vector containing higher values of x, y, z.
-	tuple<vector<double>, vector<double>> GetBounds(double tmin, double tmax, unsigned int nstep) override;
+	tuple<vector<double>, vector<double>> GetBounds(double tmin, double tmax,
+													unsigned int nstep) override;
 	// Prints to file the state of the body
 	void PrintState(ofstream& fout) override;
 	void PrintState(string outfile) override;
@@ -156,7 +158,8 @@ class Parallelepiped : public Body {
 	vector<vector<double>> GetVertices();
 	// Find smallest bounds containing the parallelepiped throughout movement, return a vector containing
 	// lower values of x, y, z and a vector containing higher values of x, y, z.
-	tuple<vector<double>, vector<double>> GetBounds(double tmin, double tmax, unsigned int nstep) override;
+	tuple<vector<double>, vector<double>> GetBounds(double tmin, double tmax,
+													unsigned int nstep) override;
 	// Prints to file the state of the body
 	void PrintState(ofstream& fout) override;
 	void PrintState(string outfile) override;
@@ -196,7 +199,8 @@ class Capsule : public Body {
 	double GetRad() { return rad; }
 	// Find smallest bounds containing the capsule throughout movement, return a vector containing
 	// lower values of x, y, z and a vector containing higher values of x, y, z.
-	tuple<vector<double>, vector<double>> GetBounds(double tmin, double tmax, unsigned int nstep) override;
+	tuple<vector<double>, vector<double>> GetBounds(double tmin, double tmax,
+													unsigned int nstep) override;
 	// Prints to file the state of the body
 	void PrintState(ofstream& fout) override;
 	void PrintState(string outfile) override;
@@ -249,7 +253,8 @@ class ManyBody : public Body {
 	void Attach(string SubName, string SuperName);
 	// Find smallest box containing the object throughout movement, return higher values of x, y, z. First
 	// translate the object so that lower values of x, y, z are all 0. Increase box dimensions by epsilon
-	tuple<vector<double>, vector<double>> GetBounds(double tmin, double tmax, unsigned int nstep) override;
+	tuple<vector<double>, vector<double>> GetBounds(double tmin, double tmax,
+													unsigned int nstep) override;
 	// Prints to file the state (all the bodies and their parameters)
 	void PrintState(ofstream& fout) override;
 	void PrintState(string outfile) override;

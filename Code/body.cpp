@@ -77,7 +77,8 @@ void Body::BeMoved(vector<double> Delta, vector<double> RotCent, vector<vector<d
 
 // Find smallest bounds containing the body throughout movement, return a vector containing lower
 // values of x, y, z and a vector containing higher values of x, y, z.
-tuple<vector<double>, vector<double>> Body::GetBounds(double tmin, double tmax, unsigned int nstep) {
+tuple<vector<double>, vector<double>> Body::GetBounds(double tmin, double tmax,
+													  unsigned int nstep) {
 	vector<double> low = vector<double>(3, numeric_limits<double>::infinity());
 	vector<double> high = vector<double>(3, -numeric_limits<double>::infinity());
 	return make_tuple(low, high);
@@ -87,7 +88,7 @@ tuple<vector<double>, vector<double>> Body::GetBounds(double tmin, double tmax, 
 vector<double> Body::GetBox(double tmin, double tmax, unsigned int nstep, double epsilon) {
 	// Get bounds
 	vector<double> low, high;
-	tie( low, high) = GetBounds( tmin, tmax, nstep);
+	tie(low, high) = GetBounds(tmin, tmax, nstep);
 	low -= vector<double>(3, epsilon);
 	high += vector<double>(3, epsilon);
 
@@ -140,7 +141,8 @@ void Sphere::Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) {
 
 // Find smallest bounds containing the sphere throughout movement, return a vector containing lower
 // values of x, y, z and a vector containing higher values of x, y, z.
-tuple<vector<double>, vector<double>> Sphere::GetBounds(double tmin, double tmax, unsigned int nstep) {
+tuple<vector<double>, vector<double>> Sphere::GetBounds(double tmin, double tmax,
+														unsigned int nstep) {
 	vector<double> low = vector<double>(3, numeric_limits<double>::infinity());
 	vector<double> high = vector<double>(3, -numeric_limits<double>::infinity());
 	if (nstep == 0)
@@ -229,10 +231,10 @@ vector<vector<double>> Parallelepiped::GetVertices() {
 	return vertices;
 }
 
-
 // Find smallest bounds containing the parallelepiped throughout movement, return a vector containing lower
 // values of x, y, z and a vector containing higher values of x, y, z.
-tuple<vector<double>, vector<double>> Parallelepiped::GetBounds(double tmin, double tmax, unsigned int nstep) {
+tuple<vector<double>, vector<double>> Parallelepiped::GetBounds(double tmin, double tmax,
+																unsigned int nstep) {
 	vector<double> low = vector<double>(3, numeric_limits<double>::infinity());
 	vector<double> high = vector<double>(3, -numeric_limits<double>::infinity());
 	if (nstep == 0)
@@ -251,7 +253,7 @@ tuple<vector<double>, vector<double>> Parallelepiped::GetBounds(double tmin, dou
 			}
 		}
 	}
-	
+
 	return make_tuple(low, high);
 }
 
@@ -310,7 +312,8 @@ void Capsule::Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) {
 
 // Find smallest bounds containing the sphere throughout movement, return a vector containing lower
 // values of x, y, z and a vector containing higher values of x, y, z.
-tuple<vector<double>, vector<double>> Capsule::GetBounds(double tmin, double tmax, unsigned int nstep) {
+tuple<vector<double>, vector<double>> Capsule::GetBounds(double tmin, double tmax,
+														 unsigned int nstep) {
 	vector<double> low = vector<double>(3, numeric_limits<double>::infinity());
 	vector<double> high = vector<double>(3, -numeric_limits<double>::infinity());
 	if (nstep == 0)
@@ -581,7 +584,8 @@ void ManyBody::Attach(string SubName, string SuperName) {
 
 // Find smallest bounds containing the object throughout movement, return a vector containing lower
 // values of x, y, z and a vector containing higher values of x, y, z.
-tuple<vector<double>, vector<double>> ManyBody::GetBounds(double tmin, double tmax, unsigned int nstep) {
+tuple<vector<double>, vector<double>> ManyBody::GetBounds(double tmin, double tmax,
+														  unsigned int nstep) {
 	vector<double> low = vector<double>(3, numeric_limits<double>::infinity());
 	vector<double> high = vector<double>(3, -numeric_limits<double>::infinity());
 	if (nstep == 0)
@@ -592,11 +596,11 @@ tuple<vector<double>, vector<double>> ManyBody::GetBounds(double tmin, double tm
 		double t = tmin + i * dt;
 		Move(t);
 		// Update bounds
-		for( Body* body : bodies ){
+		for (Body* body : bodies) {
 			vector<double> bodyLow;
 			vector<double> bodyHigh;
-			tie(bodyLow, bodyHigh) = body->GetBounds( t, t, 1 );	// Get bounds without moving body
-			for( size_t j = 0; j < 3; j++ ){
+			tie(bodyLow, bodyHigh) = body->GetBounds(t, t, 1); // Get bounds without moving body
+			for (size_t j = 0; j < 3; j++) {
 				low[j] = min(low[j], bodyLow[j]);
 				high[j] = max(high[j], bodyHigh[j]);
 			}

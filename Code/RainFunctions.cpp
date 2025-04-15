@@ -213,12 +213,12 @@ double PointSegDist(vector<double> p, vector<double> l1, vector<double> l2) {
 	// Return distance between p and the closest point belonging to the segment
 	if (proj <= 0)
 		// p closest to l1
-		return Norm(p); 
+		return Norm(p);
 	if (proj >= l2_norm2)
 		// p closest to l2
 		return Norm(p - l2);
 
-	 // p closest to its projection on the segment, calculates distance with pythagoras
+	// p closest to its projection on the segment, calculates distance with pythagoras
 	return sqrt(max(0., p * p - proj * proj / l2_norm2));
 }
 
@@ -460,22 +460,29 @@ tuple<double, double, double, double, double, double> ParabolicFit(vector<double
 	size_t n = x_vals.size();
 	assert(y_vals.size() == n && "Number of x and y values must be equal!");
 
+	// Convert to long double
+	vector<long double> x_long(n), y_long(n);
+	transform(x_vals.begin(), x_vals.end(), x_long.begin(),
+			  [](double val) { return static_cast<long double>(val); });
+	transform(y_vals.begin(), y_vals.end(), y_long.begin(),
+			  [](double val) { return static_cast<long double>(val); });
+
 	// Build design matrix
-	vector<vector<double>> X(n, vector<double>(3));
+	vector<vector<long double>> X(n, vector<long double>(3));
 	for (size_t i = 0; i < n; i++) {
 		for (size_t j = 0; j < 3; j++) {
-			X[i][j] = pow(x_vals[i], j);
+			X[i][j] = pow(x_long[i], j);
 		}
 	}
 
 	// Transpose X
-	vector<vector<double>> X_t = Transpose(X);
+	vector<vector<long double>> X_t = Transpose(X);
 
 	// Compute (X^T * X)^(-1)
-	vector<vector<double>> XtX_inv = Inverse(X_t * X);
+	vector<vector<long double>> XtX_inv = Inverse(X_t * X);
 
 	// Evaluate coefficients of y =  beta[0] + beta[1] * x + beta[2] * x^2
-	vector<double> beta = XtX_inv * X_t * y_vals;
+	vector<long double> beta = XtX_inv * X_t * y_long;
 
 	// Ensures that beta[2] != 0
 	if (beta[2] == 0)
@@ -483,39 +490,39 @@ tuple<double, double, double, double, double, double> ParabolicFit(vector<double
 	// cout << "a=" << beta[2] << " b=" << beta[1] << " c=" << beta[0] << endl;
 
 	// Compute residuals
-	vector<double> residuals(n);
+	vector<long double> residuals(n);
 	for (size_t i = 0; i < n; ++i) {
-		double y_pred = beta[0] + beta[1] * x_vals[i] + beta[2] * x_vals[i] * x_vals[i];
+		long double y_pred = beta[0] + beta[1] * x_long[i] + beta[2] * x_long[i] * x_long[i];
 		residuals[i] = y_vals[i] - y_pred;
 	}
 
 	// Estimate variance of residuals (sigma^2)
-	double rss = 0.0;
-	for (double r : residuals)
+	long double rss = 0.0;
+	for (long double r : residuals)
 		rss += r * r;
-	double sigma2 = rss / (n - 3); // degrees of freedom: n - number of parameters
+	long double sigma2 = rss / (n - 3); // degrees of freedom: n - number of parameters
 
-	// // Compute standard errors: sqrt(diag(sigma^2 * (X^T * X)^-1))
+	// Compute standard errors: sqrt(diag(sigma^2 * (X^T * X)^-1))
 	// cout << " +-" << sqrt(sigma2 * XtX_inv[2][2]) << " +-" << sqrt(sigma2 * XtX_inv[1][1]) << " +-" << sqrt(sigma2 * XtX_inv[0][0]) << endl;
 
 	// Evaluate parameters and errors
-	double k = beta[2];
-	double x0 = -beta[1] / (2 * beta[2]);
-	double y0 = beta[0] - beta[1] * beta[1] / (4 * beta[2]);
+	long double k = beta[2];
+	long double x0 = -beta[1] / (2 * beta[2]);
+	long double y0 = beta[0] - beta[1] * beta[1] / (4 * beta[2]);
 
 	// Evaluate partial derivatives
-	double dx0_db2 = beta[1] / (2 * beta[2] * beta[2]);
-	double dx0_db1 = -1 / (2 * beta[2]);
-	double dy0_db2 = beta[1] * beta[1] / (4 * beta[2] * beta[2]);
-	double dy0_db1 = -beta[1] / (2 * beta[2]);
-	double dy0_db0 = 1;
+	long double dx0_db2 = beta[1] / (2 * beta[2] * beta[2]);
+	long double dx0_db1 = -1 / (2 * beta[2]);
+	long double dy0_db2 = beta[1] * beta[1] / (4 * beta[2] * beta[2]);
+	long double dy0_db1 = -beta[1] / (2 * beta[2]);
+	long double dy0_db0 = 1;
 
 	// Evaluate erroros via error propagation
-	double k_std = sqrt(sigma2 * XtX_inv[2][2]);
-	double x0_std =
+	long double k_std = sqrt(sigma2 * XtX_inv[2][2]);
+	long double x0_std =
 		sqrt(sigma2 * ((dx0_db2 * dx0_db2 * XtX_inv[2][2]) + dx0_db1 * dx0_db1 * XtX_inv[1][1] +
 					   2 * dx0_db2 * dx0_db1 * XtX_inv[2][1]));
-	double y0_std = sqrt(
+	long double y0_std = sqrt(
 		sigma2 * (dy0_db2 * dy0_db2 * XtX_inv[2][2] + dy0_db1 * dy0_db1 * XtX_inv[1][1] +
 				  dy0_db0 * dy0_db0 * XtX_inv[0][0] + 2 * dy0_db2 * dy0_db1 * XtX_inv[2][1] +
 				  2 * dy0_db1 * dy0_db0 * XtX_inv[1][0] + 2 * dy0_db0 * dy0_db2 * XtX_inv[0][2]));
@@ -526,12 +533,11 @@ tuple<double, double, double, double, double, double> ParabolicFit(vector<double
 
 // Finds minimums of smooth wetness using Brent algorithm, calculates wetness for nfit values spaced
 // dv around it, and return a tuple containing the optimal velocity, its error, the the minimum rain,
-// its error, and a matrix containing the fit points, each row is a point, in the first colum are velocities 
+// its error, and a matrix containing the fit points, each row is a point, in the first colum are velocities
 // and in the second the wetnesses
-tuple<double, double, double, double, vector<vector<double>>> MinFitSmooth(vector<double> box, Body& body,
-												   double vmax, double dx, unsigned int nstep,
-												   double vcross, double vtail, int nfit,
-												   double dv) {
+tuple<double, double, double, double, vector<vector<double>>>
+MinFitSmooth(vector<double> box, Body& body, double vmax, double dx, unsigned int nstep,
+			 double vcross, double vtail, int nfit, double dv) {
 	vector<double> vb, wetness;
 	Brent mins(dv);
 
@@ -557,9 +563,9 @@ tuple<double, double, double, double, vector<vector<double>>> MinFitSmooth(vecto
 		int max_iter = 100;
 		int n_half = nfit / 2;
 		bool moving_forward = false, moving_backwards = false;
-		
+
 		for (int iter = 0; iter < max_iter; iter++) {
-			
+
 			tie(k, k_std, vopt, vopt_std, Rmin, Rmin_std) = ParabolicFit(vb, wetness);
 
 			// Avoid following minimum outside of range
@@ -577,8 +583,8 @@ tuple<double, double, double, double, vector<vector<double>>> MinFitSmooth(vecto
 			if (k < 0)
 				swap(n_lower, n_higher);
 
-			cout << "Iteration " << iter + 1 << ", n_lower = " << n_lower
-				 << ", n_higher = " << n_higher << endl;
+			// cout << "Iteration " << iter + 1 << ", n_lower = " << n_lower
+			// 	 << ", n_higher = " << n_higher << endl;
 
 			// Move towards minimum
 			if (n_lower < n_half) {
@@ -603,7 +609,7 @@ tuple<double, double, double, double, vector<vector<double>>> MinFitSmooth(vecto
 				break;
 		}
 
-		if( k <= 0 ){
+		if (k <= 0) {
 			vopt = mins.cx;
 			vopt_std = 0;
 			Rmin = mins.fc;
@@ -617,20 +623,19 @@ tuple<double, double, double, double, vector<vector<double>>> MinFitSmooth(vecto
 		vopt_std = 0;
 		Rmin = mins.fc;
 		Rmin_std = 0;
-
 	}
 
-	vector<vector<double>> fitPoints = Transpose(vector<vector<double>> {vb, wetness });
+	vector<vector<double>> fitPoints = Transpose(vector<vector<double>>{vb, wetness});
 
 	return make_tuple(vopt, vopt_std, Rmin, Rmin_std, fitPoints);
 }
 
 // Finds minimums of smooth wetness for a fixed vcross and [vtail_min, vtail_max] using Brent
 // algorithm, and calculates wetness for nfit values spaced dv around it, return all these values
-vector<vector<double>> FindMinFitSmooth(vector<double> box, Body& body, double vmax,
-										double dx, unsigned int nstep, double vcross,
-										double vtail_min, double vtail_max, unsigned int n_tail,
-										int nfit, double dv) {
+vector<vector<double>> FindMinFitSmooth(vector<double> box, Body& body, double vmax, double dx,
+										unsigned int nstep, double vcross, double vtail_min,
+										double vtail_max, unsigned int n_tail, int nfit,
+										double dv) {
 	vector<vector<double>> res;
 
 	for (size_t i = 0; i < n_tail; i++) {
@@ -658,10 +663,10 @@ vector<vector<double>> FindMinFitSmooth(vector<double> box, Body& body, double v
 // Finds minimums of smooth wetness for a fixed vcross and vtail_min using Brent algorithm with
 // nstep in [nstep_min, nstep_max], and calculates wetness for nfit values spaced dv around it,
 // return all these values
-vector<vector<double>> FindMinFitSmoothNstep(vector<double> box, Body& body,
-											 double vmax, double dx, unsigned int nstep_min,
-											 unsigned int nstep_max, unsigned int N_nstep,
-											 double vcross, double vtail, int nfit, double dv) {
+vector<vector<double>> FindMinFitSmoothNstep(vector<double> box, Body& body, double vmax, double dx,
+											 unsigned int nstep_min, unsigned int nstep_max,
+											 unsigned int N_nstep, double vcross, double vtail,
+											 int nfit, double dv) {
 	double dtmin = 1. / nstep_max;
 	double dtmax = 1. / nstep_min;
 	double k = N_nstep < 2 ? 1 : pow(dtmin / dtmax, (double)1 / (N_nstep - 1));
@@ -693,8 +698,8 @@ vector<vector<double>> FindMinFitSmoothNstep(vector<double> box, Body& body,
 
 // Finds minimums of smooth wetness for a fixed vcross and [vtail_min, vtail_max]x[vcross_min,
 // vcross_max] with brent, calculates wetness for nfit values around it, return all these values
-vector<vector<double>> OptMapFitSmooth(vector<double> box, Body& body, double vmax,
-									   double dx, unsigned int nstep, unsigned int nfit, double dv,
+vector<vector<double>> OptMapFitSmooth(vector<double> box, Body& body, double vmax, double dx,
+									   unsigned int nstep, unsigned int nfit, double dv,
 									   double vtail_min, double vtail_max, unsigned int n_tail,
 									   double vcross_min, double vcross_max, unsigned int n_cross) {
 	vector<vector<double>> res;
@@ -704,9 +709,9 @@ vector<vector<double>> OptMapFitSmooth(vector<double> box, Body& body, double vm
 			n_cross > 1 ? vcross_min + i * (vcross_max - vcross_min) / (n_cross - 1) : vcross_min;
 
 		// Calculate fit points
-		vector<vector<double>> res_i = FindMinFitSmooth(
-			box, body, vmax, dx, nstep, vcross_i, vtail_min, vtail_max, n_tail, nfit, dv);
-		
+		vector<vector<double>> res_i = FindMinFitSmooth(box, body, vmax, dx, nstep, vcross_i,
+														vtail_min, vtail_max, n_tail, nfit, dv);
+
 		// Add vcross_i to each row
 		for (size_t i = 0; i < res_i.size(); ++i) {
 			res_i[i].insert(res_i[i].begin(), vcross_i);
@@ -722,27 +727,35 @@ vector<vector<double>> OptMapFitSmooth(vector<double> box, Body& body, double vm
 }
 
 // Write header file for results of minimization with varying vtail and vcross
-void WriteHeadRes( ostream &out, string bodyName, double vmax, double dx, int nstep, int nfit, double dv ){
-	out << "############################################################################################################\n";
+void WriteHeadRes(ostream& out, string bodyName, double vmax, double dx, int nstep, int nfit,
+				  double dv) {
+	out << "#######################################################################################"
+		   "#####################\n";
 	out << "# Minimums of wetness found for the following parameters:\n";
 	out << "# Body = " + bodyName + ", vmax = " << vmax << " vfall\n";
 	out << "# dx = " << dx << " m, nstep = " << nstep << "\n";
 	out << "# nfit = " << nfit << ", dv = " << dv << " vfall\n";
 	out << "# Columns:\n";
-	out << "# vcross (vfall)\tvtail (vfall)\tvopt (vfall)\tvopt_std (vfall)\tRmin (m^2)\tRmin_std (m^2)\n";
-	out << "############################################################################################################" << endl;
-
+	out << "# vcross (vfall)\tvtail (vfall)\tvopt (vfall)\tvopt_std (vfall)\tRmin (m^2)\tRmin_std "
+		   "(m^2)\n";
+	out << "#######################################################################################"
+		   "#####################"
+		<< endl;
 }
 
 // Write header file for fit points of minimization with varying vtail and vcross
-void WriteHeadFit( ostream &out, string bodyName, double vmax, double dx, int nstep, int nfit, double dv ){
-	out << "############################################################################################################\n";
-	out << "# Fit points used to estimate minimums of wetness found for the following parameters:\n";
+void WriteHeadFit(ostream& out, string bodyName, double vmax, double dx, int nstep, int nfit,
+				  double dv) {
+	out << "#######################################################################################"
+		   "#####################\n";
+	out << "# Fit points used to estimate minimums of wetness found for the following "
+		   "parameters:\n";
 	out << "# Body = " + bodyName + ", vmax = " << vmax << " vfall\n";
 	out << "# dx = " << dx << " m, nstep = " << nstep << "\n";
 	out << "# nfit = " << nfit << ", dv = " << dv << " vfall\n";
 	out << "# Columns:\n";
 	out << "# vcross (vfall)\tvtail (vfall)\tvb (vfall)\tRb (m^2)\n";
-	out << "############################################################################################################" << endl;
+	out << "#######################################################################################"
+		   "#####################"
+		<< endl;
 }
-

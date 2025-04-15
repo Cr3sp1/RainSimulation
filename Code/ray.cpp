@@ -36,9 +36,10 @@ ProjSurface::ProjSurface(vector<double> box, vector<double> vel, double Dx) : dx
 
 	vector<double> u1 = H[1] - H[0];
 	// Makes sure that u1 isn't infinitesimal by taking the longest vector H[i] - H[0]
-	for( int i = 2; i <= 6; i++){
+	for (int i = 2; i <= 6; i++) {
 		vector<double> temp = H[i] - H[0];
-		if (Norm(temp) > Norm(u1)) u1 = temp;
+		if (Norm(temp) > Norm(u1))
+			u1 = temp;
 	}
 
 	u1 = (u1 / Norm(u1)) * dx;

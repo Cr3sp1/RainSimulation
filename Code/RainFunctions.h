@@ -5,9 +5,9 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <ostream>
 #include <tuple>
 #include <vector>
-#include <ostream>
 
 #include "VectorOperations.h"
 #include "mins.h"
@@ -177,41 +177,40 @@ tuple<double, double, double, double, double, double> ParabolicFit(vector<double
 
 // Finds minimums of smooth wetness using Brent algorithm, calculates wetness for nfit values spaced
 // dv around it, and return a tuple containing the optimal velocity, its error, the the minimum rain,
-// its error, and a matrix containing the fit points, each row is a point, in the first colum are velocities 
+// its error, and a matrix containing the fit points, each row is a point, in the first colum are velocities
 // and in the second the wetnesses
-tuple<double, double, double, double, vector<vector<double>>> MinFitSmooth(vector<double> box, Body& body,
-												   double vmax, double dx, unsigned int nstep,
-												   double vcross, double vtail, int nfit,
-												   double dv);
+tuple<double, double, double, double, vector<vector<double>>>
+MinFitSmooth(vector<double> box, Body& body, double vmax, double dx, unsigned int nstep,
+			 double vcross, double vtail, int nfit, double dv);
 
 // Finds minimums of smooth wetness for a fixed vcross and [vtail_min,
 // vtail_max] using Brent algorithm, and calculates wetness for nfit values
 // spaced dv around it, return all these values
-vector<vector<double>> FindMinFitSmooth(vector<double> box, Body& body, double vmax,
-										double dx, unsigned int nstep, double vcross,
-										double vtail_min, double vtail_max, unsigned int n_tail,
-										int nfit, double dv);
+vector<vector<double>> FindMinFitSmooth(vector<double> box, Body& body, double vmax, double dx,
+										unsigned int nstep, double vcross, double vtail_min,
+										double vtail_max, unsigned int n_tail, int nfit, double dv);
 
 // Finds minimums of smooth wetness for a fixed vcross and vtail_min using Brent algorithm with
 // nstep in [nstep_min, nstep_max], and calculates wetness for nfit values spaced dv around it,
 // return all these values
-vector<vector<double>> FindMinFitSmoothNstep(vector<double> box, Body& body,
-											 double vmax, double dx, unsigned int nstep_min,
-											 unsigned int nstep_max, unsigned int N_nstep,
-											 double vcross, double vtail, int nfit, double dv);
+vector<vector<double>> FindMinFitSmoothNstep(vector<double> box, Body& body, double vmax, double dx,
+											 unsigned int nstep_min, unsigned int nstep_max,
+											 unsigned int N_nstep, double vcross, double vtail,
+											 int nfit, double dv);
 
 // Finds minimums of smooth wetness for a fixed vcross and [vtail_min, vtail_max]x[vcross_min,
 // vcross_max] with brent, calculates wetness for nfit values around it, return all these values
-vector<vector<double>> OptMapFitSmooth(vector<double> box, Body& body, double vmax,
-									   double dx, unsigned int nstep, unsigned int nfit, double dv,
+vector<vector<double>> OptMapFitSmooth(vector<double> box, Body& body, double vmax, double dx,
+									   unsigned int nstep, unsigned int nfit, double dv,
 									   double vtail_min, double vtail_max, unsigned int n_tail,
 									   double vcross_min, double vcross_max, unsigned int n_cross);
 
-
 // Write header file for results of minimization with varying vtail and vcross
-void WriteHeadRes( ostream &out, string bodyName, double vmax, double dx, int nstep, int nfit, double dv );
+void WriteHeadRes(ostream& out, string bodyName, double vmax, double dx, int nstep, int nfit,
+				  double dv);
 
 // Write header file for fit points of minimization with varying vtail and vcross
-void WriteHeadFit( ostream &out, string bodyName, double vmax, double dx, int nstep, int nfit, double dv );
+void WriteHeadFit(ostream& out, string bodyName, double vmax, double dx, int nstep, int nfit,
+				  double dv);
 
 #endif
