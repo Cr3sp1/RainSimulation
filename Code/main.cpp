@@ -16,121 +16,113 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
 
-	vector<double> vb = {1.769719636088, 1.775719636088, 1.781719636088,
-						 1.787719636088, 1.793719636088, 1.799719636088,
-						 1.805719636088, 1.811719636088, 1.817719636088};
-	vector<double> Rb = {0.418572908087, 0.418572051202, 0.418571803502,
-						 0.418571435464, 0.418571571225, 0.418572938301,
-						 0.418572395098, 0.418572765983, 0.418573366983};
+	// Declare stuff
+	string bodyPath, bodyName;
+	double vmax;
+	double dx;
+	int nstep;
+	int nfit;
+	double dv;
+	double vtail_min, vtail_max;
+	int n_vtail;
+	double vcross_min, vcross_max;
+	int n_vcross;
+	string resPath;
+	string fitPath;
 
-	double k, k_std, vopt, vopt_std, Rmin, Rmin_std;
-	tie(k, k_std, vopt, vopt_std, Rmin, Rmin_std) = ParabolicFit(vb, Rb);
-	cout << fixed << setprecision(12);
-	cout << "k = " << k << ", k_std = " << k_std << ", vopt = " << vopt
-		 << ", vopt_std = " << vopt_std << ", Rmin = " << Rmin << ", Rmin_std = " << Rmin_std
+	// Read the input file
+	ifstream ReadInput("input.in");
+	if (!ReadInput) {
+		std::cerr << "Error opening input file." << std::endl;
+		return 1;
+	}
+	ReadInput >> bodyPath;
+	bodyName = filesystem::path(bodyPath).filename().string();
+	ReadInput >> vmax;
+	ReadInput >> dx;
+	ReadInput >> nstep;
+	ReadInput >> nfit;
+	ReadInput >> dv;
+	ReadInput >> vtail_min >> vtail_max >> n_vtail;
+	ReadInput >> vcross_min >> vcross_max >> n_vcross;
+	ReadInput >> resPath;
+	ReadInput >> fitPath;
+	ReadInput.close();
+
+	// Output parameters
+	cout << "######################################################################################"
+			"############\n";
+	cout << "Body = " + bodyName + ", vmax = " << vmax << " vfall\n";
+	cout << "dx = " << dx << " m, nstep = " << nstep << "\n";
+	cout << "nfit = " << nfit << ", dv = " << dv << " vfall\n";
+	cout << "vtail_min = " << vtail_min << " vfall, vtail_max = " << vtail_max
+		 << " vfall, n_vtail = " << n_vtail << "\n";
+	cout << "vcross_min = " << vcross_min << " vfall, vcross_max = " << vcross_max
+		 << " vfall, n_vcross = " << n_vcross << "\n";
+	cout << "Printing fit results to " + resPath + " and fit points to " + fitPath + "\n";
+	cout << "######################################################################################"
+			"############"
 		 << endl;
 
-	// // Declare stuff
-	// string bodyPath, bodyName;
-	// double vmax;
-	// double dx;
-	// int nstep;
-	// int nfit;
-	// double dv;
-	// double vtail_min, vtail_max;
-	// int n_vtail;
-	// double vcross_min, vcross_max;
-	// int n_vcross;
-	// string resPath;
-	// string fitPath;
+	// Get Body and box
+	ManyBody body(bodyPath);
+	vector<double> box = body.GetBox(0, 1, nstep, dx);
 
-	// // Read the input file
-	// ifstream ReadInput("input.in");
-	// if (!ReadInput) {
-	// 	std::cerr << "Error opening input file." << std::endl;
-	// 	return 1;
-	// }
-	// ReadInput >> bodyPath;
-	// bodyName = filesystem::path(bodyPath).filename().string();
-	// ReadInput >> vmax;
-	// ReadInput >> dx;
-	// ReadInput >> nstep;
-	// ReadInput >> nfit;
-	// ReadInput >> dv;
-	// ReadInput >> vtail_min >> vtail_max >> n_vtail;
-	// ReadInput >> vcross_min >> vcross_max >> n_vcross;
-	// ReadInput >> resPath;
-	// ReadInput >> fitPath;
-	// ReadInput.close();
+	// Prepare output streams and files
+	ofstream outRes(resPath);
+	if (!outRes) {
+		cerr << "Error opening results output file." << endl;
+		return 1;
+	}
+	WriteHeadRes(outRes, bodyName, vmax, dx, nstep, nfit, dv);
+	outRes << fixed << setprecision(12);
 
-	// // Output parameters
-	// cout << "##################################################################################################\n";
-	// cout << "Body = " + bodyName + ", vmax = " << vmax << " vfall\n";
-	// cout << "dx = " << dx << " m, nstep = " << nstep << "\n";
-	// cout << "nfit = " << nfit << ", dv = " << dv << " vfall\n";
-	// cout << "vtail_min = " << vtail_min << " vfall, vtail_max = " << vtail_max << " vfall, n_vtail = " << n_vtail << "\n";
-	// cout << "vcross_min = " << vcross_min << " vfall, vcross_max = " << vcross_max << " vfall, n_vcross = " << n_vcross << "\n";
-	// cout << "Printing fit results to " + resPath + " and fit points to " + fitPath  + "\n";
-	// cout << "##################################################################################################" << endl;
+	ostream* outFit;
+	ofstream outFitFile;
+	ostringstream nullStream;
+	if (fitPath == "None") {
+		outFit = &nullStream;
+		cout << "Not writing fit points to file." << endl;
+	} else {
+		outFitFile.open(fitPath);
+		if (!outFitFile) {
+			cerr << "Error opening results output file." << endl;
+			return 1;
+		}
+		outFit = &outFitFile;
+	}
+	WriteHeadFit(*outFit, bodyName, vmax, dx, nstep, nfit, dv);
+	*outFit << fixed << setprecision(12);
 
-	// // Get Body and box
-	// ManyBody body(bodyPath);
-	// vector<double> box = body.GetBox(0, 1, nstep, dx);
+	// Evaluate and write to file results
+	for (size_t i = 0; i < n_vcross; i++) {
+		double vcross_i =
+			n_vcross > 1 ? vcross_min + i * (vcross_max - vcross_min) / (n_vcross - 1) : vcross_min;
 
-	// // Prepare output streams and files
-	// ofstream outRes(resPath);
-	// if (!outRes) {
-	// 	cerr << "Error opening results output file." << endl;
-	// 	return 1;
-	// }
-	// WriteHeadRes(outRes, bodyName, vmax, dx, nstep, nfit, dv);
-	// outRes << fixed << setprecision(12);
+		for (size_t j = 0; j < n_vtail; j++) {
+			double vtail_j =
+				n_vtail > 1 ? vtail_min + j * (vtail_max - vtail_min) / (n_vtail - 1) : vtail_min;
 
-	// ostream *outFit;
-	// ofstream outFitFile;
-	// ostringstream nullStream;
-	// if ( fitPath == "None" ) {
-	// 	outFit = &nullStream;
-	// 	cout << "Not writing fit points to file." << endl;
-	// } else {
-	// 	outFitFile.open(fitPath);
-	// 	if (!outFitFile) {
-	// 		cerr << "Error opening results output file." << endl;
-	// 		return 1;
-	// 	}
-	// 	outFit = &outFitFile;
-	// }
-	// WriteHeadFit(*outFit, bodyName, vmax, dx, nstep, nfit, dv);
-	// *outFit << fixed << setprecision(12);
+			double vopt, vopt_std, Rmin, Rmin_std;
+			vector<vector<double>> fitPoints;
 
-	// // Evaluate and write to file results
-	// for (size_t i = 0; i < n_vcross; i++) {
-	// 	double vcross_i =
-	// 		n_vcross > 1 ? vcross_min + i * (vcross_max - vcross_min) / (n_vcross - 1) : vcross_min;
+			tie(vopt, vopt_std, Rmin, Rmin_std, fitPoints) =
+				MinFitSmooth(box, body, vmax, dx, nstep, vcross_i, vtail_j, nfit, dv);
 
-	// 	for(size_t j = 0; j < n_vtail; j++) {
-	// 		double vtail_j =
-	// 		n_vtail > 1 ? vtail_min + j * (vtail_max - vtail_min) / (n_vtail - 1) : vtail_min;
+			outRes << vcross_i << "\t" << vtail_j << "\t" << vopt << "\t" << vopt_std << "\t"
+				   << Rmin << "\t" << Rmin_std << endl;
 
-	// 		double vopt, vopt_std, Rmin, Rmin_std;
-	// 		vector<vector<double>> fitPoints;
+			// Add vcross_i and vtail_j and to each row and write to file
+			for (size_t i = 0; i < fitPoints.size(); ++i) {
+				fitPoints[i].insert(fitPoints[i].begin(), vtail_j);
+				fitPoints[i].insert(fitPoints[i].begin(), vcross_i);
+			}
+			Print(*outFit, fitPoints, 12);
 
-	// 		tie(vopt, vopt_std, Rmin, Rmin_std, fitPoints) =
-	// 		MinFitSmooth(box, body, vmax, dx, nstep, vcross_i, vtail_j, nfit, dv);
-
-	// 		outRes << vcross_i << "\t" << vtail_j << "\t" << vopt << "\t" << vopt_std << "\t" << Rmin << "\t" << Rmin_std << endl;
-
-	// 		// Add vcross_i and vtail_j and to each row and write to file
-	// 		for (size_t i = 0; i < fitPoints.size(); ++i) {
-	// 			fitPoints[i].insert(fitPoints[i].begin(), vtail_j);
-	// 			fitPoints[i].insert(fitPoints[i].begin(), vcross_i);
-	// 		}
-	// 		Print( *outFit, fitPoints, 12);
-
-	// 		cout << "Step " << i*n_vtail + j + 1 << "/" << n_vtail*n_vcross << " completed!" << endl;
-	// 	}
-
-	// }
+			cout << "Step " << i * n_vtail + j + 1 << "/" << n_vtail * n_vcross << " completed!"
+				 << endl;
+		}
+	}
 
 	cout << "All done!" << endl;
 }

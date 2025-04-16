@@ -1,0 +1,9 @@
+############################################################################################################
+# Fit points used to estimate minimums of wetness found for the following parameters:
+# Body = RunningMan.in, vmax = 2 vfall
+# dx = 0.001 m, nstep = 50
+# nfit = 9, dv = 0.006 vfall
+# Columns:
+# vcross (vfall)	vtail (vfall)	vb (vfall)	Rb (m^2)
+############################################################################################################
+0.600000000000	0.265306122400	2.000000000000	0.413394388366	
