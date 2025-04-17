@@ -7,10 +7,9 @@ using namespace std;
 // Declares V
 vector<double> Ray::V(3);
 
-// Resets the surface between steps (turns on all rays)
+// Resets the surface between steps (resets weights to 0)
 void ProjSurface::reset() {
 	for (size_t i = 0; i < rays.size(); i++) {
-		rays[i].On();
 		rays[i].SetWeight(0.);
 	}
 }
@@ -37,9 +36,9 @@ ProjSurface::ProjSurface(vector<double> box, vector<double> vel, double Dx) : dx
 	vector<double> u1 = H[1] - H[0];
 	// Makes sure that u1 isn't infinitesimal by taking the longest vector H[i] - H[0]
 	for (int i = 2; i <= 6; i++) {
-		vector<double> temp = H[i] - H[0];
-		if (Norm(temp) > Norm(u1))
-			u1 = temp;
+		vector<double> vec_i = H[i] - H[0];
+		if (Norm(vec_i) > Norm(u1))
+			u1 = vec_i;
 	}
 
 	u1 = (u1 / Norm(u1)) * dx;
@@ -76,49 +75,8 @@ ProjSurface::ProjSurface(vector<double> box, vector<double> vel, double Dx) : dx
 	// cout << "Number of rays generated: " << rays.size() << endl;
 }
 
-// Prints all the origins of the active rays to file
-void ProjSurface::PrintR(ofstream& fout) {
-	for (Ray& ray : rays) {
-		vector<double> r = ray.GetR0();
-		fout << r[0] << ", " << r[1] << ", " << r[2] << ", " << ray.IsOn() << endl;
-	}
-}
-
-void ProjSurface::PrintR(string outfile) {
-	ofstream fout(outfile);
-	PrintR(fout);
-	fout.close();
-}
-
-// Prints all the origins of the rays projected on the x-y plane to file, last column is 1 if
-// active, 0 if not
-void ProjSurface::PrintRaysFlat(ofstream& fout) {
-	// Finds rotation to make points parallel to x-y
-	vector<double> uz = {0, 0, 1};
-	vector<double> v = Ray::V / Norm(Ray::V);
-	vector<double> axis = CrossProduct(v, uz);
-	double theta = acos(v * uz);
-	vector<vector<double>> rotmat = RotMat(axis, theta);
-
-	// Finds translation that brings H[0] to 0 after rotation
-	vector<double> trans = rotmat * H[0];
-
-	for (Ray& ray : rays) {
-		vector<double> r = ray.GetR0();
-		r = rotmat * r;
-		r -= trans;
-		fout << r[0] << "," << r[1] << "," << ray.IsOn() << endl;
-	}
-}
-
-void ProjSurface::PrintRaysFlat(string outfile) {
-	ofstream fout(outfile);
-	PrintRaysFlat(fout);
-	fout.close();
-}
-
 // Prints all the origins of the active rays projected on the x-y plane and their weight to file
-void ProjSurface::PrintRaysFlatSmooth(ofstream& fout) {
+void ProjSurface::PrintRaysFlat(ofstream& fout) {
 	// Finds rotation to make points parallel to x-y
 	vector<double> uz = {0, 0, 1};
 	vector<double> v = Ray::V / Norm(Ray::V);
@@ -137,9 +95,9 @@ void ProjSurface::PrintRaysFlatSmooth(ofstream& fout) {
 	}
 }
 
-void ProjSurface::PrintRaysFlatSmooth(string outfile) {
+void ProjSurface::PrintRaysFlat(string outfile) {
 	ofstream fout(outfile);
-	PrintRaysFlatSmooth(fout);
+	PrintRaysFlat(fout);
 	fout.close();
 }
 
@@ -158,47 +116,11 @@ void ProjSurface::PrintH(string outfile) {
 
 // Return an estimate of the projection of the body on the plane
 double ProjSurface::BodyProj(Body& body) {
-	unsigned int nhit = 0;
-	// cout << "Projecting on " << rays.size() << " rays" << endl;
-	body.Prime(H[0], Ray::V);
-	for (Ray& ray : rays) {
-		if (body.Check(ray)) {
-			ray.Off();
-			nhit++;
-		}
-	}
-	// cout << "nhit = " << nhit << endl;
-	return nhit * dx * dx;
-}
-
-// Return an estimate of the projection of the dynamic body on the plane
-double ProjSurface::BodyProj(Body& body, double tmin, double tmax, unsigned int nstep) {
-	if (nstep == 0)
-		return 0;
-	double dt = (tmax - tmin) / nstep;
-	unsigned int nhit = 0;
-
-	// cout << "Projecting on " << rays.size() << " rays" << endl;
-	for (unsigned int i = 0; i < nstep; i++) {
-		double t = tmin + i * dt;
-		body.Move(t);
-		body.Prime(H[0], Ray::V);
-		for (Ray& ray : rays) {
-			if (body.Check(ray))
-				nhit++;
-		}
-	}
-	// cout << "nhit = " << nhit << endl;
-	return nhit * dx * dx / nstep;
-}
-
-// Return a smooth estimate of the projection of the body on the plane
-double ProjSurface::BodyProjSmooth(Body& body) {
 	double tot_w = 0;
 	// cout << "Projecting on " << rays.size() << " rays" << endl;
 	body.Prime(H[0], Ray::V);
 	for (Ray& ray : rays) {
-		double w = body.CheckSmooth(ray, dx);
+		double w = body.Check(ray, dx);
 		tot_w += w;
 		ray.SetWeight(w);
 	}
@@ -206,8 +128,8 @@ double ProjSurface::BodyProjSmooth(Body& body) {
 	return tot_w * dx * dx;
 }
 
-// Return a smooth estimate of the projection of the dynamic body on the plane
-double ProjSurface::BodyProjSmooth(Body& body, double tmin, double tmax, unsigned int nstep) {
+// Return an estimate of the projection of the dynamic body on the plane
+double ProjSurface::BodyProj(Body& body, double tmin, double tmax, unsigned int nstep) {
 	if (nstep == 0)
 		return 0;
 	double dt = (tmax - tmin) / nstep;
@@ -219,7 +141,7 @@ double ProjSurface::BodyProjSmooth(Body& body, double tmin, double tmax, unsigne
 		body.Move(t);
 		body.Prime(H[0], Ray::V);
 		for (Ray& ray : rays) {
-			tot_w += body.CheckSmooth(ray, dx);
+			tot_w += body.Check(ray, dx);
 		}
 	}
 	// cout << "nhit = " << nhit << endl;

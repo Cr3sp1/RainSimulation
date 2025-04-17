@@ -21,9 +21,6 @@ class Ray {
 	// Starting point
 	vector<double> R0;
 
-	// The ray starts active and deactivates when it hits an object
-	bool Active;
-
 	// Weight of the ray, desctibes its proximity to the object
 	double Weight;
 
@@ -35,17 +32,12 @@ class Ray {
 	void SetV(vector<double> v) { v = V; }
 
 	// Complete static constructor
-	Ray(vector<double> position, vector<double> direction)
-		: R0(position), Active(true), Weight(0.) {
+	Ray(vector<double> position, vector<double> direction) : R0(position), Weight(0.) {
 		V = direction;
 	};
 
 	// Efficient constructor
-	Ray(vector<double> position) : R0(position), Active(true), Weight(0.){};
-
-	// Turns the ray on and off
-	void On() { Active = true; }
-	void Off() { Active = false; }
+	Ray(vector<double> position) : R0(position), Weight(0.){};
 
 	// Sets the weight to a value
 	void SetWeight(double w) { Weight = w; }
@@ -53,7 +45,6 @@ class Ray {
 	// Gets stuff
 	vector<double> GetR0() { return R0; }
 	vector<double> GetV() { return V; };
-	bool IsOn() { return Active; }
 	double GetWeight() { return Weight; }
 };
 
@@ -84,14 +75,9 @@ class ProjSurface {
 	void PrintR(ofstream& fout);
 	void PrintR(string outfile);
 
-	// Prints all the origins of the rays projected on the x-y plane to file, last column is 1 if
-	// active, 0 if not
+	// Prints all the origins of the rays projected on the x-y plane and their weight to file
 	void PrintRaysFlat(ofstream& fout);
 	void PrintRaysFlat(string outfile);
-
-	// Prints all the origins of the rays projected on the x-y plane and their weight to file
-	void PrintRaysFlatSmooth(ofstream& fout);
-	void PrintRaysFlatSmooth(string outfile);
 
 	// Prints H to file
 	void PrintH(ofstream& fout);
@@ -102,12 +88,6 @@ class ProjSurface {
 
 	// Return an estimate of the projection of the dynamic body on the plane
 	double BodyProj(Body& body, double tmin, double tmax, unsigned int nstep);
-
-	// Return a smooth estimate of the projection of the body on the plane
-	double BodyProjSmooth(Body& body);
-
-	// Return a smooth estimate of the projection of the dynamic body on the plane
-	double BodyProjSmooth(Body& body, double tmin, double tmax, unsigned int nstep);
 };
 
 #endif // __Ray_h__

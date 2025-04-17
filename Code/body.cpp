@@ -110,21 +110,12 @@ void Body::PrintState(string outfile) {
 // Primes the body to be checked (projects the center of the sphere onto the surface)
 void Sphere::Prime(vector<double> p, vector<double> v) { Hcent = Project(cent, p, v); }
 
-// Checks if the Sphere is making contact with a ray
-bool Sphere::Check(Ray& ray) {
-	vector<double> Xrel = ray.GetR0() - Hcent;
-	if (Xrel * Xrel <= rad2) { // Use std::Norm instead, store rad2 only once
-		return true;
-	}
-	return false;
-}
-
 // Return a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at least a
 // distance dx from the body, 1 if the ray is at least dx inside the body
-double Sphere::CheckSmooth(Ray& ray, double dx) {
+double Sphere::Check(Ray& ray, double dx) {
 	vector<double> Xrel = ray.GetR0() - Hcent;
 	double delta_r = Norm(Xrel) - rad;
-	return smooth_w(delta_r, dx);
+	return d_to_w(delta_r, dx);
 }
 
 // Translates the sphere by Delta
@@ -181,17 +172,9 @@ void Parallelepiped::Prime(vector<double> P, vector<double> V) {
 	H = FindHexProj(p, side, V, P);
 }
 
-// Checks if the body is making contact with a ray
-bool Parallelepiped::Check(Ray& ray) {
-	if (PointIsInsideT(ray.GetR0(), H)) { // Use less triangles (4 not 6)
-		return true;
-	}
-	return false;
-}
-
 // Return a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at least a
 // distance dx from the body, 1 if the ray is at least dx inside the body
-double Parallelepiped::CheckSmooth(Ray& ray, double dx) {
+double Parallelepiped::Check(Ray& ray, double dx) {
 	// Finds smallest distance from all side of the hexagon
 	double delta_r = dx; // Sentinel value
 	vector<double> point = ray.GetR0();
@@ -201,7 +184,7 @@ double Parallelepiped::CheckSmooth(Ray& ray, double dx) {
 	// Changes sign of the distance if the ray intersects the hexagon
 	if (PointIsInsideT(point, H))
 		delta_r = -delta_r;
-	return smooth_w(delta_r, dx);
+	return d_to_w(delta_r, dx);
 }
 
 // Translates the parallelepiped by Delta
@@ -281,19 +264,11 @@ void Capsule::Prime(vector<double> p, vector<double> v) {
 	H2 = Project(l2, p, v);
 }
 
-// Checks if the Capsule is making contact with a ray
-bool Capsule::Check(Ray& ray) {
-	if (PointSegDist(ray.GetR0(), H1, H2) <= rad) {
-		return true;
-	}
-	return false;
-}
-
 // Return a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at least a
 // distance dx from the body, 1 if the ray is at least dx inside the body
-double Capsule::CheckSmooth(Ray& ray, double dx) {
+double Capsule::Check(Ray& ray, double dx) {
 	double delta_r = PointSegDist(ray.GetR0(), H1, H2) - rad;
-	return smooth_w(delta_r, dx);
+	return d_to_w(delta_r, dx);
 }
 
 // Translates the sphere by Delta
@@ -511,22 +486,13 @@ void ManyBody::Prime(vector<double> p, vector<double> v) {
 		body->Prime(p, v);
 }
 
-// Checks if the ManyBody is making contact with a ray
-bool ManyBody::Check(Ray& ray) {
-	// Iterates over all bodies or until a body makes contact
-	for (Body* body : bodies)
-		if (body->Check(ray))
-			return true;
-	return false;
-}
-
 // Return a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at least a
 // distance dx from the body, 1 if the ray is at least dx inside the body
-double ManyBody::CheckSmooth(Ray& ray, double dx) {
+double ManyBody::Check(Ray& ray, double dx) {
 	double w = 0;
 	// Iterates over all bodies or until a body makes full contact
 	for (Body* body : bodies) {
-		w = max(w, body->CheckSmooth(ray, dx));
+		w = max(w, body->Check(ray, dx));
 		if (w == 1)
 			return w;
 	}

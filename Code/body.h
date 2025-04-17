@@ -50,11 +50,9 @@ class Body {
 	// Primes the body to be checked. p is a point on the surface containing the ray origins and v
 	// is the relative velocity
 	virtual void Prime(vector<double> p, vector<double> v) {}
-	// Checks if the body is making contact with a ray
-	virtual bool Check(Ray& ray) { return false; }
 	// Return a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at
 	// least a distance dx from the body, 1 if the ray is at least dx inside the body
-	virtual double CheckSmooth(Ray& ray, double dx) { return 0.; }
+	virtual double Check(Ray& ray, double dx) { return 0.; }
 	// Translates the body by Delta
 	virtual void Translate(vector<double> Delta) {
 		if (w.size() > 0)
@@ -103,11 +101,9 @@ class Sphere : public Body {
 	// Primes the body to be checked. p is a point on the surface containing the ray origins and v
 	// is the relative velocity
 	void Prime(vector<double> p, vector<double> v) override;
-	// Checks if the body is making contact with a ray and if so adds its the volume to the wetness
-	bool Check(Ray& ray) override;
 	// Return a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at
 	// least a distance dx from the body, 1 if the ray is at least dx inside the body
-	double CheckSmooth(Ray& ray, double dx) override;
+	double Check(Ray& ray, double dx) override;
 	// Translates the sphere by Delta
 	void Translate(vector<double> Delta) override;
 	// Rotates the sphere around point Rot0 according to rotation matrix Rotmat
@@ -143,11 +139,9 @@ class Parallelepiped : public Body {
 	// Primes the body to be checked. p is a point on the surface containing the ray origins and v
 	// is the relative velocity
 	void Prime(vector<double> p, vector<double> v) override;
-	// Checks if the body is making contact with a ray
-	bool Check(Ray& ray) override;
 	// Return a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at
 	// least a distance dx from the body, 1 if the ray is at least dx inside the body
-	double CheckSmooth(Ray& ray, double dx) override;
+	double Check(Ray& ray, double dx) override;
 	// Translates the parallelepiped by Delta
 	void Translate(vector<double> Delta) override;
 	// Rotates the parallelepiped around point Rot0 according to rotation matrix Rotmat
@@ -184,11 +178,9 @@ class Capsule : public Body {
 	// Primes the body to be checked. p is a point on the surface containing theray origins and v is
 	// the relative velocity
 	void Prime(vector<double> p, vector<double> v) override;
-	// Checks if the body is making contact with a ray and if so adds its thevolume to the wetness
-	bool Check(Ray& ray) override;
 	// Return a value in [0, 1] describing how close the ray is to the body, 0 ifthe ray is at
 	// least a distance dx from the body, 1 if the ray is at leastdx inside the body
-	double CheckSmooth(Ray& ray, double dx) override;
+	double Check(Ray& ray, double dx) override;
 	// Translates capsule body by Delta
 	void Translate(vector<double> Delta) override;
 	// Rotates the capsule around point Rot0 according to rotation matrix Rotmat
@@ -225,11 +217,9 @@ class ManyBody : public Body {
 	// Primes the body to be checked. p is a point on the surface containing theray origins and v is
 	// the relative velocity
 	void Prime(vector<double> p, vector<double> v) override;
-	// Checks if the body is making contact with a ray and if so adds its thevolume to the wetness
-	bool Check(Ray& ray) override;
 	// Return a value in [0, 1] describing how close the ray is to the body, 0 ifthe ray is at
 	// least a distance dx from the body, 1 if the ray is at leastdx inside the body
-	double CheckSmooth(Ray& ray, double dx) override;
+	double Check(Ray& ray, double dx) override;
 	// Translates all the bodies by Delta
 	void Translate(vector<double> Delta) override;
 	// Rotates all the bodies around point Rot0 according to rotation matrix Rotmat

@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
 			vector<vector<double>> fitPoints;
 
 			tie(vopt, vopt_std, Rmin, Rmin_std, fitPoints) =
-				MinFitSmooth(box, body, vmax, dx, nstep, vcross_i, vtail_j, nfit, dv);
+				MinFit(box, body, vmax, dx, nstep, vcross_i, vtail_j, nfit, dv);
 
 			outRes << vcross_i << "\t" << vtail_j << "\t" << vopt << "\t" << vopt_std << "\t"
 				   << Rmin << "\t" << Rmin_std << endl;
