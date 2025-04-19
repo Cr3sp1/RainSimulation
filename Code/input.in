@@ -1,13 +1,13 @@
-../Bodies/RunningMan.in
-2.
+../Bodies/WalkingMan.in
+0.7
 0.001
 50
 9
 0.006
 0 1.2 20
 1.01052631579 1.2 4
-../data/Run/MapResComp_4.dat
-../data/Run/MapFitComp_4.dat
+../data/Walk/MapRes.dat
+../data/Walk/MapFit.dat
 
   	ReadInput >> bodyPath;                                  (path to the body input file)
 	ReadInput >> vmax;                                      (maximum velocity if the body, must be float > 0)
