@@ -6,8 +6,8 @@
 0.006
 0 1.2 20
 1.01052631579 1.2 4
-../data/Walk/MapRes.dat
-../data/Walk/MapFit.dat
+../data/Walk/MapResComp_4.dat
+../data/Walk/MapFitComp_4.dat
 
   	ReadInput >> bodyPath;                                  (path to the body input file)
 	ReadInput >> vmax;                                      (maximum velocity if the body, must be float > 0)
