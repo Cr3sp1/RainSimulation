@@ -61,7 +61,7 @@ class Body {
 	// Rotates the body around point Rot0 according to rotation matrix Rotmat
 	virtual void Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) {}
 	// Time evolution of the body in its own frame of reference, also propagates to the sub-bodies
-	virtual void Move(double T);
+	virtual void Move(double tnew);
 	// Time evolution caused by the super-body, affects the whole frame of reference, also
 	// propagates to the sub-bodies
 	virtual void BeMoved(vector<double> Delta, vector<double> Rot0, vector<vector<double>> Rotmat);
@@ -225,7 +225,7 @@ class ManyBody : public Body {
 	// Rotates all the bodies around point Rot0 according to rotation matrix Rotmat
 	virtual void Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) override;
 	// Time evolution of all the bodies
-	void Move(double T) override;
+	void Move(double tnew) override;
 	// Time evolution caused by the super-body, affects the whole frame ofreference, also propagates
 	// to the sub-bodies
 	void BeMoved(vector<double> Delta, vector<double> Rot0,
