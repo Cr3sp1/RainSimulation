@@ -485,7 +485,7 @@ MinFit(vector<double> box, Body& body, double vmax, double dx, unsigned int nste
 				break;
 		}
 
-		if (k <= 0) {
+		if (k <= 0 || vopt > vmax) {
 			vopt = mins.cx;
 			vopt_std = 0;
 			Rmin = mins.fc;
