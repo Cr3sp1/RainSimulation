@@ -1,13 +1,13 @@
 ../Bodies/WalkingMan.in
 0.7
-0.005
+0.001
 50
 9
 0.006
 0.8444444444 2. 8
-0.3 0.3 1
-../data/Walk/FunCompRes030.dat
-../data/Walk/FunCompFit030.dat
+0. 0. 1
+../data/Walk/FunCompRes0.dat
+../data/Walk/FunCompFit0.dat
 
   	ReadInput >> bodyPath;                                  (path to the body input file)
 	ReadInput >> vmax;                                      (maximum velocity if the body, must be float > 0)
