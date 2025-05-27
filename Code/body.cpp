@@ -19,11 +19,11 @@ void Body::Move(double tnew) {
 	vector<double> delta({0, 0, 0});
 	// Add sin terms
 	for (size_t i = 0; 2 * i < trans.size(); i++) {
-		delta += trans[2 * i] * (sin(tnew * (i + 1) * 2 * M_PI ) - sin(t * (i + 1) * 2 * M_PI ));
+		delta += trans[2 * i] * (sin(tnew * (i + 1) * 2 * M_PI) - sin(t * (i + 1) * 2 * M_PI));
 	}
 	// Add cos terms
 	for (size_t i = 0; 2 * i + 1 < trans.size(); i++) {
-		delta += trans[2 * i + 1] * (cos(tnew * (i + 1) * 2 * M_PI ) - cos(t * (i + 1) * 2 * M_PI ));
+		delta += trans[2 * i + 1] * (cos(tnew * (i + 1) * 2 * M_PI) - cos(t * (i + 1) * 2 * M_PI));
 	}
 	// Translate
 	Translate(delta);
@@ -34,11 +34,11 @@ void Body::Move(double tnew) {
 		double theta = 0;
 		// Add sin terms
 		for (size_t i = 0; 2 * i < w.size(); i++) {
-			theta += w[2 * i] * (sin(tnew * (i + 1) * 2 * M_PI ) - sin(t * (i + 1)) * 2 * M_PI);
+			theta += w[2 * i] * (sin(tnew * (i + 1) * 2 * M_PI) - sin(t * (i + 1)) * 2 * M_PI);
 		}
 		// Add cos terms
 		for (size_t i = 0; 2 * i + 1 < w.size(); i++) {
-			theta += w[2 * i + 1] * (cos(tnew * (i + 1) * 2 * M_PI ) - cos(t *  (i + 1) * 2 * M_PI));
+			theta += w[2 * i + 1] * (cos(tnew * (i + 1) * 2 * M_PI) - cos(t * (i + 1) * 2 * M_PI));
 		}
 		rotmat = RotMat(rotax, theta);
 	} else {

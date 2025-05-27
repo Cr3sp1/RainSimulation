@@ -634,3 +634,50 @@ void WriteHeadFit(ostream& out, string bodyName, double vmax, double dx, int nst
 		   "#####################"
 		<< endl;
 }
+
+// Perform a test calcultation and check that results are right
+bool AllGood() {
+	ManyBody testBody;
+
+	vector<double> centS = {0., 0., 0.};
+	double radS = 0.3;
+	vector<double> rotcentS(3), axisS(3), wS;
+	vector<vector<double>> transS = {{0.2, 0.1, 0}, {0., 0.2, 0.1}};
+	testBody.AddBody(Sphere(centS, radS, "testSphere", rotcentS, axisS, wS, transS));
+
+	vector<double> centP = {0., 0.1, 0.};
+	vector<vector<double>> sidesP = {{0.1, 0, 0}, {0, 0.4, 0}, {0, 0, 0.2}};
+	vector<double> rotcentP = {0., 0.45, 0.};
+	vector<double> axisP = {1., 0., 0.};
+	vector<double> wP = {60., 90.};
+	vector<vector<double>> transP = {{0., 0.1, 0.05}, {0., 0.5, 0.1}};
+	testBody.AddBody(Parallelepiped(centP, sidesP, "testPippo", rotcentP, axisP, wP, transP));
+
+	vector<double> l1 = {0., 0.1, 0.1};
+	vector<double> l2 = {0., 0.0, -0.2};
+	double radC = 0.15;
+	vector<double> rotcentC = l1;
+	vector<double> axisC = {0., 0., 1};
+	vector<double> wC = {15., 20.};
+	vector<vector<double>> transC;
+	testBody.AddBody(Capsule(l1, l2, radC, "testCapsule", rotcentC, axisC, wC, transC));
+	testBody.Attach("testCapsule", "testPippo");
+
+	int tmin = 0, tmax = 1, nstep = 10;
+	double dx = 0.005;
+	vector<double> testBox = testBody.GetBox(tmin, tmax, nstep, 2 * dx);
+
+	vector<double> rainVel = {0.1, 0.2, -1};
+	double vb = 0.5;
+
+	double expected = 0.774876157013791;
+	double evaluated = Wetness(testBox, testBody, rainVel, vb, dx, tmin, tmax, nstep);
+
+	double epsilon = expected * 1e-10;
+	if (abs(expected - evaluated) < epsilon)
+		return true;
+	cout << setprecision(15) << "WARNING: SOMETHING IS NOT WORKING!\n"
+		 << "Expected test value:  " << expected << "\n"
+		 << "Evaluated test value: " << evaluated << endl;
+	return false;
+}

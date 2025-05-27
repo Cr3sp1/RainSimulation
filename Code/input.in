@@ -6,8 +6,8 @@
 0.006
 0.8444444444 2. 8
 0. 0. 1
-../data/Walk/FunCompRes0.dat
-../data/Walk/FunCompFit0.dat
+../data/Temp/FunCompRes0.dat
+../data/Temp/FunCompFit0.dat
 
   	ReadInput >> bodyPath;                                  (path to the body input file)
 	ReadInput >> vmax;                                      (maximum velocity if the body, must be float > 0)

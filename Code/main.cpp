@@ -16,6 +16,10 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
 
+	// Check that everything is working properly
+	if (AllGood() == false)
+		return 1;
+
 	// Declare stuff
 	string bodyPath, bodyName;
 	double vmax;
@@ -125,4 +129,6 @@ int main(int argc, char* argv[]) {
 	}
 
 	cout << "All done!" << endl;
+
+	return 0;
 }

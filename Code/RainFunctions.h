@@ -155,4 +155,7 @@ void WriteHeadRes(ostream& out, string bodyName, double vmax, double dx, int nst
 void WriteHeadFit(ostream& out, string bodyName, double vmax, double dx, int nstep, int nfit,
 				  double dv);
 
+// Perform a test calcultation and check that results are right
+bool AllGood();
+
 #endif
