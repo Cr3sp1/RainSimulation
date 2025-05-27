@@ -10,37 +10,50 @@ Body::~Body() {
 	// cout << "Destroying " << name << endl;
 }
 
-// Time evolution of the body in its own frame of reference, also propagates to the sub-bodies
-void Body::Move(double tnew) {
-	if (tnew == t)
-		return;
+// Evaluate theta at a time t
+double Body::getTheta(double t) {
+	double res = 0;
+	// Add sin terms
+	for (size_t i = 0; 2 * i < w.size(); i++) {
+		res += w[2 * i] * sin(t * (i + 1) * 2 * M_PI);
+	}
+	// Add cos terms
+	for (size_t i = 0; 2 * i + 1 < w.size(); i++) {
+		res += w[2 * i + 1] * cos(t * (i + 1) * 2 * M_PI);
+	}
+	return res;
+}
 
-	// Calculate the total translation for the step
-	vector<double> delta({0, 0, 0});
+// Evaluate delta at a time t
+vector<double> Body::getDelta(double t) {
+	vector<double> res = {0, 0, 0};
 	// Add sin terms
 	for (size_t i = 0; 2 * i < trans.size(); i++) {
-		delta += trans[2 * i] * (sin(tnew * (i + 1) * 2 * M_PI) - sin(t * (i + 1) * 2 * M_PI));
+		res += trans[2 * i] * sin(t * (i + 1) * 2 * M_PI);
 	}
 	// Add cos terms
 	for (size_t i = 0; 2 * i + 1 < trans.size(); i++) {
-		delta += trans[2 * i + 1] * (cos(tnew * (i + 1) * 2 * M_PI) - cos(t * (i + 1) * 2 * M_PI));
+		res += trans[2 * i + 1] * cos(t * (i + 1) * 2 * M_PI);
 	}
+	return res;
+}
+
+// Time evolution of the body in its own frame of reference, also propagates to the sub-bodies
+void Body::Move(double tnew) {
+	// Calculate the total translation for the step
+	vector<double> deltaNew = getDelta(tnew);
+	vector<double> deltaShift = deltaNew - delta;
+	delta = deltaNew;
 	// Translate
-	Translate(delta);
+	Translate(deltaShift);
 
 	// Generate rotation matrix
 	vector<vector<double>> rotmat;
 	if (w.size() > 0) {
-		double theta = 0;
-		// Add sin terms
-		for (size_t i = 0; 2 * i < w.size(); i++) {
-			theta += w[2 * i] * (sin(tnew * (i + 1) * 2 * M_PI) - sin(t * (i + 1)) * 2 * M_PI);
-		}
-		// Add cos terms
-		for (size_t i = 0; 2 * i + 1 < w.size(); i++) {
-			theta += w[2 * i + 1] * (cos(tnew * (i + 1) * 2 * M_PI) - cos(t * (i + 1) * 2 * M_PI));
-		}
-		rotmat = RotMat(rotax, theta);
+		double thetaNew = getTheta(tnew);
+		double thetaShift = thetaNew - theta;
+		theta = thetaNew;
+		rotmat = RotMat(rotax, thetaShift);
 	} else {
 		rotmat = IdMat(3);
 	}
@@ -49,30 +62,30 @@ void Body::Move(double tnew) {
 
 	// Propagate motion to sub-bodies
 	for (Body* body : SubBodies)
-		body->BeMoved(delta, rotcent, rotmat);
+		body->BeMoved(deltaShift, rotcent, rotmat);
 
-	t = tnew;
+	T = tnew;
 }
 
 // Time evolution caused by the super-body, affects the whole frame of reference, also propagates to
 // the sub-bodie
-void Body::BeMoved(vector<double> Delta, vector<double> RotCent, vector<vector<double>> Rotmat) {
+void Body::BeMoved(vector<double> shift, vector<double> rot0, vector<vector<double>> rotmat) {
 	// Translate
-	Translate(Delta);
+	Translate(shift);
 
 	// Rotate
-	Rotate(RotCent, Rotmat);
+	Rotate(rot0, rotmat);
 	// Rotate frame of reference
 	if (w.size() != 0) {
-		RotatePoint(rotcent, RotCent, Rotmat);
-		rotax = Rotmat * rotax;
+		RotatePoint(rotcent, rot0, rotmat);
+		rotax = rotmat * rotax;
 	}
 	for (vector<double>& vec : trans)
-		vec = Rotmat * vec;
+		vec = rotmat * vec;
 
 	// Move sub-bodies
 	for (Body* body : SubBodies)
-		body->BeMoved(Delta, RotCent, Rotmat);
+		body->BeMoved(shift, rot0, rotmat);
 }
 
 // Find smallest bounds containing the body throughout movement, return a vector containing lower
@@ -118,16 +131,16 @@ double Sphere::Check(Ray& ray, double dx) {
 	return d_to_w(delta_r, dx);
 }
 
-// Translates the sphere by Delta
-void Sphere::Translate(vector<double> Delta) {
+// Translates the sphere by shift
+void Sphere::Translate(vector<double> shift) {
 	if (w.size() > 0)
-		rotcent += Delta;
-	cent += Delta;
+		rotcent += shift;
+	cent += shift;
 }
 
-// Rotates the sphere around point Rot0 according to rotation matrix Rotmat
-void Sphere::Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) {
-	RotatePoint(cent, Rot0, Rotmat);
+// Rotates the sphere around point rot0 according to rotation matrix rotmat
+void Sphere::Rotate(vector<double> rot0, vector<vector<double>> rotmat) {
+	RotatePoint(cent, rot0, rotmat);
 }
 
 // Find smallest bounds containing the sphere throughout movement, return a vector containing lower
@@ -187,18 +200,18 @@ double Parallelepiped::Check(Ray& ray, double dx) {
 	return d_to_w(delta_r, dx);
 }
 
-// Translates the parallelepiped by Delta
-void Parallelepiped::Translate(vector<double> Delta) {
+// Translates the parallelepiped by shift
+void Parallelepiped::Translate(vector<double> shift) {
 	if (w.size() > 0)
-		rotcent += Delta;
-	cent += Delta;
+		rotcent += shift;
+	cent += shift;
 }
 
-// Rotates the parallelepiped around point Rot0 according to rotation matrix Rotmat
-void Parallelepiped::Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) {
-	RotatePoint(cent, Rot0, Rotmat);
+// Rotates the parallelepiped around point rot0 according to rotation matrix rotmat
+void Parallelepiped::Rotate(vector<double> rot0, vector<vector<double>> rotmat) {
+	RotatePoint(cent, rot0, rotmat);
 	for (vector<double>& point : side)
-		point = Rotmat * point;
+		point = rotmat * point;
 }
 
 // Return all 8 vertices of the parallelepiped
@@ -271,18 +284,18 @@ double Capsule::Check(Ray& ray, double dx) {
 	return d_to_w(delta_r, dx);
 }
 
-// Translates the sphere by Delta
-void Capsule::Translate(vector<double> Delta) {
+// Translates the sphere by shift
+void Capsule::Translate(vector<double> shift) {
 	if (w.size() > 0)
-		rotcent += Delta;
-	l1 += Delta;
-	l2 += Delta;
+		rotcent += shift;
+	l1 += shift;
+	l2 += shift;
 }
 
-// Rotates the Capsule around point Rot0 according to rotation matrix Rotmat
-void Capsule::Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) {
-	RotatePoint(l1, Rot0, Rotmat);
-	RotatePoint(l2, Rot0, Rotmat);
+// Rotates the Capsule around point rot0 according to rotation matrix rotmat
+void Capsule::Rotate(vector<double> rot0, vector<vector<double>> rotmat) {
+	RotatePoint(l1, rot0, rotmat);
+	RotatePoint(l2, rot0, rotmat);
 }
 
 // Find smallest bounds containing the sphere throughout movement, return a vector containing lower
@@ -499,29 +512,29 @@ double ManyBody::Check(Ray& ray, double dx) {
 	return w;
 }
 
-// Translates the sphere by Delta
-void ManyBody::Translate(vector<double> Delta) {
+// Translates the sphere by shift
+void ManyBody::Translate(vector<double> shift) {
 	if (w.size() > 0)
-		rotcent += Delta;
+		rotcent += shift;
 	for (Body* body : bodies)
-		body->Translate(Delta);
+		body->Translate(shift);
 }
 
-// Rotates the Capsule around point Rot0 according to rotation matrix Rotmat
-void ManyBody::Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) {
+// Rotates the Capsule around point rot0 according to rotation matrix rotmat
+void ManyBody::Rotate(vector<double> rot0, vector<vector<double>> rotmat) {
 	for (Body* body : bodies)
-		body->Rotate(Rot0, Rotmat);
+		body->Rotate(rot0, rotmat);
 }
 
 // Time evolution of the body
 void ManyBody::Move(double tnew) {
-	if (tnew == t)
+	if (tnew == T)
 		return;
 	// Move parts
 	for (Body* body : bodies)
 		body->Move(tnew);
 
-	t = tnew;
+	T = tnew;
 }
 
 // Return a pointer to the body with that name in the ManyBody

@@ -54,9 +54,9 @@ vector<vector<double>> IdMat(unsigned int N);
 // Return the rotation matrix
 vector<vector<double>> RotMat(vector<double> axis, double theta);
 
-// Rotates a Point relative to the point Rot0
-void RotatePoint(vector<double>& Point, const vector<double>& Rot0,
-				 const vector<vector<double>>& Rotmat);
+// Rotates a Point relative to the point rot0
+void RotatePoint(vector<double>& Point, const vector<double>& rot0,
+				 const vector<vector<double>>& rotmat);
 
 // Prints the shadow of a body at nstep different time steps in [tmin, tmax)
 void PrintDynShadow(vector<double> box, Body& body, vector<double> relvel, double dx, double tmin,

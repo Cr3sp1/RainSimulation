@@ -144,14 +144,14 @@ vector<vector<double>> RotMat(vector<double> axis, double theta) {
 			 axis[2] * axis[2] * G + c}};
 }
 
-// Rotates a Point relative to the point Rot0
-void RotatePoint(vector<double>& Point, const vector<double>& Rot0,
-				 const vector<vector<double>>& Rotmat) {
-	if (Rotmat == IdMat(3))
+// Rotates a Point relative to the point rot0
+void RotatePoint(vector<double>& Point, const vector<double>& rot0,
+				 const vector<vector<double>>& rotmat) {
+	if (rotmat == IdMat(3))
 		return;
-	Point -= Rot0;
-	Point = Rotmat * Point;
-	Point += Rot0;
+	Point -= rot0;
+	Point = rotmat * Point;
+	Point += rot0;
 }
 
 // Prints the shadow of a body at nstep different time steps in [tmin, tmax)
@@ -664,13 +664,13 @@ bool AllGood() {
 	testBody.Attach("testCapsule", "testPippo");
 
 	int tmin = 0, tmax = 1, nstep = 10;
-	double dx = 0.005;
+	double dx = 0.01;
 	vector<double> testBox = testBody.GetBox(tmin, tmax, nstep, 2 * dx);
 
 	vector<double> rainVel = {0.1, 0.2, -1};
 	double vb = 0.5;
 
-	double expected = 0.774876157013791;
+	double expected = 0.752264590730204;
 	double evaluated = Wetness(testBox, testBody, rainVel, vb, dx, tmin, tmax, nstep);
 
 	double epsilon = expected * 1e-10;

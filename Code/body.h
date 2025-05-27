@@ -24,7 +24,7 @@ class Body {
 	// Name (optional)
 	string name;
 	// Time (should go from 0 to 1)
-	double t;
+	double T = 0;
 	// Center of rotation
 	vector<double> rotcent;
 	// Axis of rotation
@@ -35,16 +35,23 @@ class Body {
 	// Vectors used for periodic translation in time evolution (coefficients in
 	// sin expasion of periodic motion)
 	vector<vector<double>> trans;
+	// Value of angle of rotation from t=0 to current t
+	double theta = 0;
+	// Value of translation from t=0 to current t
+	vector<double> delta;
 	// Pointers to all the bodies that move relative to this one
 	vector<Body*> SubBodies;
 
   public:
 	// Default constructor
-	Body() : t(0), w(0){};
+	Body(){};
 	// Dynamic constructor
 	Body(string Name, vector<double> Rotcent, vector<double> Rotax, vector<double> W,
 		 vector<vector<double>> Trans)
-		: name(Name), t(0), rotcent(Rotcent), rotax(Rotax), w(W), trans(Trans) {}
+		: name(Name), T(0), rotcent(Rotcent), rotax(Rotax), w(W), trans(Trans) {
+			theta = getTheta(0);
+			delta = getDelta(0);
+		}
 	// Virtual destructor
 	virtual ~Body();
 	// Primes the body to be checked. p is a point on the surface containing the ray origins and v
@@ -53,18 +60,22 @@ class Body {
 	// Return a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at
 	// least a distance dx from the body, 1 if the ray is at least dx inside the body
 	virtual double Check(Ray& ray, double dx) { return 0.; }
-	// Translates the body by Delta
-	virtual void Translate(vector<double> Delta) {
+	// Translates the body by shift
+	virtual void Translate(vector<double> shift) {
 		if (w.size() > 0)
-			rotcent += Delta;
+			rotcent += shift;
 	}
-	// Rotates the body around point Rot0 according to rotation matrix Rotmat
-	virtual void Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) {}
+	// Evaluate theta at a time t
+	double getTheta(double t);
+	// Evaluate delta at a time t
+	vector<double> getDelta(double t);
+	// Rotates the body around point rot0 according to rotation matrix rotmat
+	virtual void Rotate(vector<double> rot0, vector<vector<double>> rotmat) {}
 	// Time evolution of the body in its own frame of reference, also propagates to the sub-bodies
 	virtual void Move(double tnew);
 	// Time evolution caused by the super-body, affects the whole frame of reference, also
 	// propagates to the sub-bodies
-	virtual void BeMoved(vector<double> Delta, vector<double> Rot0, vector<vector<double>> Rotmat);
+	virtual void BeMoved(vector<double> shift, vector<double> rot0, vector<vector<double>> rotmat);
 	// Adds a Body to SubBodies
 	virtual void AddSubBody(Body& SubBody) { SubBodies.push_back(&SubBody); }
 	// Attaches the Body to a SuperBody
@@ -104,10 +115,10 @@ class Sphere : public Body {
 	// Return a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at
 	// least a distance dx from the body, 1 if the ray is at least dx inside the body
 	double Check(Ray& ray, double dx) override;
-	// Translates the sphere by Delta
-	void Translate(vector<double> Delta) override;
-	// Rotates the sphere around point Rot0 according to rotation matrix Rotmat
-	void Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) override;
+	// Translates the sphere by shift
+	void Translate(vector<double> shift) override;
+	// Rotates the sphere around point rot0 according to rotation matrix rotmat
+	void Rotate(vector<double> rot0, vector<vector<double>> rotmat) override;
 	// Gets stuff
 	vector<double> GetCent() { return cent; }
 	double GetRad() { return rad; }
@@ -142,10 +153,10 @@ class Parallelepiped : public Body {
 	// Return a value in [0, 1] describing how close the ray is to the body, 0 if the ray is at
 	// least a distance dx from the body, 1 if the ray is at least dx inside the body
 	double Check(Ray& ray, double dx) override;
-	// Translates the parallelepiped by Delta
-	void Translate(vector<double> Delta) override;
-	// Rotates the parallelepiped around point Rot0 according to rotation matrix Rotmat
-	void Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) override;
+	// Translates the parallelepiped by shift
+	void Translate(vector<double> shift) override;
+	// Rotates the parallelepiped around point rot0 according to rotation matrix rotmat
+	void Rotate(vector<double> rot0, vector<vector<double>> rotmat) override;
 	// Gets stuff
 	vector<double> GetCent() { return cent; }
 	vector<vector<double>> GetSide() { return side; }
@@ -181,10 +192,10 @@ class Capsule : public Body {
 	// Return a value in [0, 1] describing how close the ray is to the body, 0 ifthe ray is at
 	// least a distance dx from the body, 1 if the ray is at leastdx inside the body
 	double Check(Ray& ray, double dx) override;
-	// Translates capsule body by Delta
-	void Translate(vector<double> Delta) override;
-	// Rotates the capsule around point Rot0 according to rotation matrix Rotmat
-	void Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) override;
+	// Translates capsule body by shift
+	void Translate(vector<double> shift) override;
+	// Rotates the capsule around point rot0 according to rotation matrix rotmat
+	void Rotate(vector<double> rot0, vector<vector<double>> rotmat) override;
 	// Gets stuff
 	vector<double> GetL1() { return l1; }
 	vector<double> GetL2() { return l2; }
@@ -220,16 +231,16 @@ class ManyBody : public Body {
 	// Return a value in [0, 1] describing how close the ray is to the body, 0 ifthe ray is at
 	// least a distance dx from the body, 1 if the ray is at leastdx inside the body
 	double Check(Ray& ray, double dx) override;
-	// Translates all the bodies by Delta
-	void Translate(vector<double> Delta) override;
-	// Rotates all the bodies around point Rot0 according to rotation matrix Rotmat
-	virtual void Rotate(vector<double> Rot0, vector<vector<double>> Rotmat) override;
+	// Translates all the bodies by shift
+	void Translate(vector<double> shift) override;
+	// Rotates all the bodies around point rot0 according to rotation matrix rotmat
+	virtual void Rotate(vector<double> rot0, vector<vector<double>> rotmat) override;
 	// Time evolution of all the bodies
 	void Move(double tnew) override;
 	// Time evolution caused by the super-body, affects the whole frame ofreference, also propagates
 	// to the sub-bodies
-	void BeMoved(vector<double> Delta, vector<double> Rot0,
-				 vector<vector<double>> Rotmat) override {};
+	void BeMoved(vector<double> shift, vector<double> rot0,
+				 vector<vector<double>> rotmat) override {};
 	// Add bodies
 	void AddBody(Sphere sphere) { bodies.push_back(new Sphere(sphere)); }
 	void AddBody(Parallelepiped parallelepiped) {
