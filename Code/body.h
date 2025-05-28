@@ -23,8 +23,6 @@ class Body {
   protected:
 	// Name (optional)
 	string name;
-	// Time (should go from 0 to 1)
-	double T = 0;
 	// Center of rotation
 	vector<double> rotcent;
 	// Axis of rotation
@@ -35,9 +33,9 @@ class Body {
 	// Vectors used for periodic translation in time evolution (coefficients in
 	// sin expasion of periodic motion)
 	vector<vector<double>> trans;
-	// Value of angle of rotation from t=0 to current t
+	// Value of angle of rotation
 	double theta = 0;
-	// Value of translation from t=0 to current t
+	// Value of translation
 	vector<double> delta;
 	// Pointers to all the bodies that move relative to this one
 	vector<Body*> SubBodies;
@@ -48,7 +46,7 @@ class Body {
 	// Dynamic constructor
 	Body(string Name, vector<double> Rotcent, vector<double> Rotax, vector<double> W,
 		 vector<vector<double>> Trans)
-		: name(Name), T(0), rotcent(Rotcent), rotax(Rotax), w(W), trans(Trans) {
+		: name(Name), rotcent(Rotcent), rotax(Rotax), w(W), trans(Trans) {
 			theta = getTheta(0);
 			delta = getDelta(0);
 		}
@@ -72,7 +70,7 @@ class Body {
 	// Rotates the body around point rot0 according to rotation matrix rotmat
 	virtual void Rotate(vector<double> rot0, vector<vector<double>> rotmat) {}
 	// Time evolution of the body in its own frame of reference, also propagates to the sub-bodies
-	virtual void Move(double tnew);
+	virtual void Move(double tNew);
 	// Time evolution caused by the super-body, affects the whole frame of reference, also
 	// propagates to the sub-bodies
 	virtual void BeMoved(vector<double> shift, vector<double> rot0, vector<vector<double>> rotmat);
@@ -236,7 +234,7 @@ class ManyBody : public Body {
 	// Rotates all the bodies around point rot0 according to rotation matrix rotmat
 	virtual void Rotate(vector<double> rot0, vector<vector<double>> rotmat) override;
 	// Time evolution of all the bodies
-	void Move(double tnew) override;
+	void Move(double tNew) override;
 	// Time evolution caused by the super-body, affects the whole frame ofreference, also propagates
 	// to the sub-bodies
 	void BeMoved(vector<double> shift, vector<double> rot0,

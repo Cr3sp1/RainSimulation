@@ -39,32 +39,24 @@ vector<double> Body::getDelta(double t) {
 }
 
 // Time evolution of the body in its own frame of reference, also propagates to the sub-bodies
-void Body::Move(double tnew) {
-	// Calculate the total translation for the step
-	vector<double> deltaNew = getDelta(tnew);
+void Body::Move(double tNew) {
+	// Calculate the total translation and rotation for the step
+	vector<double> deltaNew = getDelta(tNew);
 	vector<double> deltaShift = deltaNew - delta;
 	delta = deltaNew;
-	// Translate
-	Translate(deltaShift);
 
-	// Generate rotation matrix
-	vector<vector<double>> rotmat;
-	if (w.size() > 0) {
-		double thetaNew = getTheta(tnew);
-		double thetaShift = thetaNew - theta;
-		theta = thetaNew;
-		rotmat = RotMat(rotax, thetaShift);
-	} else {
-		rotmat = IdMat(3);
-	}
-	// Rotate
+	double thetaNew = getTheta(tNew);
+	double thetaShift = thetaNew - theta;
+	theta = thetaNew;
+	vector<vector<double>> rotmat = RotMat(rotax, thetaShift);
+
+	// Move
+	Translate(deltaShift);
 	Rotate(rotcent, rotmat);
 
 	// Propagate motion to sub-bodies
 	for (Body* body : SubBodies)
 		body->BeMoved(deltaShift, rotcent, rotmat);
-
-	T = tnew;
 }
 
 // Time evolution caused by the super-body, affects the whole frame of reference, also propagates to
@@ -527,14 +519,10 @@ void ManyBody::Rotate(vector<double> rot0, vector<vector<double>> rotmat) {
 }
 
 // Time evolution of the body
-void ManyBody::Move(double tnew) {
-	if (tnew == T)
-		return;
+void ManyBody::Move(double tNew) {
 	// Move parts
 	for (Body* body : bodies)
-		body->Move(tnew);
-
-	T = tnew;
+		body->Move(tNew);
 }
 
 // Return a pointer to the body with that name in the ManyBody
