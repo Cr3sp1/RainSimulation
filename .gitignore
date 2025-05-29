@@ -243,3 +243,5 @@ pyrightconfig.json
 Stuff/
 Visualization/WalkFrames
 Visualization/RunFrames
+Visualization/PippoFrames
+data/Parallelepiped/Proj

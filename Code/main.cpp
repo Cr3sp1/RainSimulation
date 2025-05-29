@@ -68,65 +68,92 @@ int main(int argc, char* argv[]) {
 			"############"
 		 << endl;
 
-	// Get Body and box
-	ManyBody body(bodyPath);
-	vector<double> box = body.GetBox(0, 1, nstep, dx);
 
-	// Prepare output streams and files
-	ofstream outRes(resPath);
-	if (!outRes) {
-		cerr << "Error opening results output file." << endl;
-		return 1;
+	// Simulation of two Parallelepipeds compenetrating
+	ManyBody Trial2P("../Bodies/DoubleParallelepiped.in");
+	vector<double> rain_vel = {0, vcross_min, -1};
+	double body_vel = 0.52;
+	vector<double> box ={1.1, 1.1, 1.1};
+	vector<double> dist;
+	vector<double> wet2P;
+	vector<vector<double>> results;
+	for (int i = 0; i < nstep; i++) {
+		double t = asin((double)i / (nstep - 1)) / (2 * M_PI);
+		Trial2P.Move(t); // it just works ;)
+		vector<double> cent1 = dynamic_cast<Parallelepiped*>(Trial2P.Find("Still"))->GetCent();
+		vector<double> cent2 = dynamic_cast<Parallelepiped*>(Trial2P.Find("Moving"))->GetCent();
+		dist.push_back(Norm(cent1 - cent2));
+		wet2P.push_back(Wetness(box, Trial2P, rain_vel, body_vel, dx));
+		PrintDynShadow(box, Trial2P, rain_vel - vector<double>{body_vel, 0, 0}, dx, t, t, 1, 
+		"../data/Parallelepiped/Proj/2p_" + to_string(i) + ".dat");
+		cout << "Step "<<  i+1 <<"/" << nstep<< " completed!" << endl;
 	}
-	WriteHeadRes(outRes, bodyName, vmax, dx, nstep, nfit, dv);
-	outRes << fixed << setprecision(12);
+	results = {dist, wet2P};
+	results = Transpose(results);
+	Print(resPath, results, 12);
 
-	ostream* outFit;
-	ofstream outFitFile;
-	ostringstream nullStream;
-	if (fitPath == "None") {
-		outFit = &nullStream;
-		cout << "Not writing fit points to file." << endl;
-	} else {
-		outFitFile.open(fitPath);
-		if (!outFitFile) {
-			cerr << "Error opening results output file." << endl;
-			return 1;
-		}
-		outFit = &outFitFile;
-	}
-	WriteHeadFit(*outFit, bodyName, vmax, dx, nstep, nfit, dv);
-	*outFit << fixed << setprecision(12);
 
-	// Evaluate and write to file results
-	for (size_t i = 0; i < n_vcross; i++) {
-		double vcross_i =
-			n_vcross > 1 ? vcross_min + i * (vcross_max - vcross_min) / (n_vcross - 1) : vcross_min;
+	// // Get Body and box
+	// ManyBody body(bodyPath);
+	// vector<double> box = body.GetBox(0, 1, nstep, dx);
 
-		for (size_t j = 0; j < n_vtail; j++) {
-			double vtail_j =
-				n_vtail > 1 ? vtail_min + j * (vtail_max - vtail_min) / (n_vtail - 1) : vtail_min;
+	// // Prepare output streams and files
+	// ofstream outRes(resPath);
+	// if (!outRes) {
+	// 	cerr << "Error opening results output file." << endl;
+	// 	return 1;
+	// }
+	// WriteHeadRes(outRes, bodyName, vmax, dx, nstep, nfit, dv);
+	// outRes << fixed << setprecision(12);
 
-			double vopt, vopt_std, Rmin, Rmin_std;
-			vector<vector<double>> fitPoints;
+	// ostream* outFit;
+	// ofstream outFitFile;
+	// ostringstream nullStream;
+	// if (fitPath == "None") {
+	// 	outFit = &nullStream;
+	// 	cout << "Not writing fit points to file." << endl;
+	// } else {
+	// 	outFitFile.open(fitPath);
+	// 	if (!outFitFile) {
+	// 		cerr << "Error opening results output file." << endl;
+	// 		return 1;
+	// 	}
+	// 	outFit = &outFitFile;
+	// }
+	// WriteHeadFit(*outFit, bodyName, vmax, dx, nstep, nfit, dv);
+	// *outFit << fixed << setprecision(12);
 
-			tie(vopt, vopt_std, Rmin, Rmin_std, fitPoints) =
-				MinFit(box, body, vmax, dx, nstep, vcross_i, vtail_j, nfit, dv);
+	// // Evaluate and write to file results
+	// for (size_t i = 0; i < n_vcross; i++) {
+	// 	double vcross_i =
+	// 		n_vcross > 1 ? vcross_min + i * (vcross_max - vcross_min) / (n_vcross - 1) : vcross_min;
 
-			outRes << vcross_i << "\t" << vtail_j << "\t" << vopt << "\t" << vopt_std << "\t"
-				   << Rmin << "\t" << Rmin_std << endl;
+	// 	for (size_t j = 0; j < n_vtail; j++) {
+	// 		double vtail_j =
+	// 			n_vtail > 1 ? vtail_min + j * (vtail_max - vtail_min) / (n_vtail - 1) : vtail_min;
 
-			// Add vcross_i and vtail_j and to each row and write to file
-			for (size_t i = 0; i < fitPoints.size(); ++i) {
-				fitPoints[i].insert(fitPoints[i].begin(), vtail_j);
-				fitPoints[i].insert(fitPoints[i].begin(), vcross_i);
-			}
-			Print(*outFit, fitPoints, 12);
+	// 		double vopt, vopt_std, Rmin, Rmin_std;
+	// 		vector<vector<double>> fitPoints;
 
-			cout << "Step " << i * n_vtail + j + 1 << "/" << n_vtail * n_vcross << " completed!"
-				 << endl;
-		}
-	}
+	// 		tie(vopt, vopt_std, Rmin, Rmin_std, fitPoints) =
+	// 			MinFit(box, body, vmax, dx, nstep, vcross_i, vtail_j, nfit, dv);
+
+	// 		outRes << vcross_i << "\t" << vtail_j << "\t" << vopt << "\t" << vopt_std << "\t"
+	// 			   << Rmin << "\t" << Rmin_std << endl;
+
+	// 		// Add vcross_i and vtail_j and to each row and write to file
+	// 		for (size_t i = 0; i < fitPoints.size(); ++i) {
+	// 			fitPoints[i].insert(fitPoints[i].begin(), vtail_j);
+	// 			fitPoints[i].insert(fitPoints[i].begin(), vcross_i);
+	// 		}
+	// 		Print(*outFit, fitPoints, 12);
+
+	// 		cout << "Step " << i * n_vtail + j + 1 << "/" << n_vtail * n_vcross << " completed!"
+	// 			 << endl;
+	// 	}
+	// }
+
+
 
 	cout << "All done!" << endl;
 

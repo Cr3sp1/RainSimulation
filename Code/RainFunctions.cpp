@@ -165,9 +165,9 @@ void PrintDynShadow(vector<double> box, Body& body, vector<double> relvel, doubl
 		body.Move(t);
 		canvas.reset();
 		canvas.BodyProj(body);
-		string out = outfile + to_string(t) + ".dat";
-		cout << "Printing to " << out << endl;
-		canvas.PrintRaysFlat(out);
+		// string out = outfile + to_string(t) + ".dat";
+		cout << "Printing to " << outfile << endl;
+		canvas.PrintRaysFlat(outfile);
 		t += dt;
 	}
 }

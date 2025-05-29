@@ -1,12 +1,12 @@
 ../Bodies/WalkingMan.in
 0.7
-0.1
-50
+0.001
+100
 9
 0.006
 0. 0. 1
-0. 0. 1
-../data/Temp/Res.dat
+0.03 0.03 1
+"../data/Parallelepiped/DoubleP003.dat"
 ../data/Temp/Fit.dat
 
   	ReadInput >> bodyPath;                                  (path to the body input file)
