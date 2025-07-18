@@ -1,7 +1,7 @@
 CC = clang++
 CFLAGS = -Wall -O3 --std=c++17 
 DEBUG_CFLAGS = -Wall -O3 --std=c++17 -pedantic -Winline -g
-MYLIBS = body.o ray.o RainFunctions.o
+MYLIBS = body.o ray.o RainFunctions.o tinyxml2.o
 
 main.exe: main.cpp ${MYLIBS}
 	$(CC) -o $@ $^ $(CFLAGS) 

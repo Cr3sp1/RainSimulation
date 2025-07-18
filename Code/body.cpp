@@ -2,8 +2,10 @@
 
 #include "RainFunctions.h"
 #include "ray.h"
+#include "tinyxml2.h"
 
 using namespace std;
+using namespace tinyxml2;
 
 // Virtual destructor
 Body::~Body() {
@@ -151,7 +153,7 @@ tuple<vector<double>, vector<double>> Sphere::GetBounds(double tmin, double tmax
 		// Update bounds
 		for (size_t j = 0; j < 3; j++) {
 			low[j] = min(low[j], cent[j] - rad);
-			high[j] = max(high[j], cent[j] - rad);
+			high[j] = max(high[j], cent[j] + rad);
 		}
 	}
 
@@ -212,7 +214,7 @@ vector<vector<double>> Parallelepiped::GetVertices() {
 	for (double i = -0.5; i <= 0.5; i++) {
 		for (double j = -0.5; j <= 0.5; j++) {
 			for (double k = -0.5; k <= 0.5; k++) {
-				vertices.push_back(cent + i * side[0] / 2. + j * side[1] / 2. + k * side[2] / 2.);
+				vertices.push_back(cent + i * side[0] + j * side[1] + k * side[2]);
 			}
 		}
 	}
@@ -236,8 +238,8 @@ tuple<vector<double>, vector<double>> Parallelepiped::GetBounds(double tmin, dou
 		vector<vector<double>> vertices = GetVertices();
 		for (vector<double> vertex : vertices) {
 			for (size_t j = 0; j < 3; j++) {
-				low[j] = min(low[j], vertex[i]);
-				high[j] = max(high[j], vertex[i]);
+				low[j] = min(low[j], vertex[j]);
+				high[j] = max(high[j], vertex[j]);
 			}
 		}
 	}
@@ -305,8 +307,8 @@ tuple<vector<double>, vector<double>> Capsule::GetBounds(double tmin, double tma
 		Move(t);
 		// Update bounds
 		for (size_t j = 0; j < 3; j++) {
-			low[j] = min(min(low[j], l1[j] - rad), l2[j] - rad);
-			high[j] = max(max(low[j], l1[j] + rad), l2[j] + rad);
+			low[j] = min(min(l1[j] - rad, l2[j] - rad), low[j]);
+			high[j] = max(max(l1[j] + rad, l2[j] + rad), high[j]);
 		}
 	}
 
@@ -338,142 +340,91 @@ ManyBody::ManyBody(const vector<Sphere>& Spheres, const vector<Parallelepiped>& 
 		AddBody(capsule);
 }
 
-// Constructor from file
+// Constuctor
 ManyBody::ManyBody(string filename) : Body() {
-	ifstream file(filename);
-	if (!file.is_open()) {
-		std::cerr << "Error opening file: " << filename << std::endl;
-		return;
+	XMLDocument doc;
+	if (doc.LoadFile(filename.c_str()) != XML_SUCCESS) {
+		throw logic_error(string("Error loading XML file: " + filename));
 	}
 
-	string line;
+	XMLElement* root = doc.FirstChildElement("ManyBody");
+	if (!root) {
+		throw logic_error(string("No <ManyBody> root found."));
+	}
 
-	// Get bodies
-	while (getline(file, line)) {
-		istringstream iss(line);
-		string type, name, superbody;
-		iss >> type;
+	for (XMLElement* bodyElem = root->FirstChildElement("Body"); bodyElem;
+		 bodyElem = bodyElem->NextSiblingElement("Body")) {
+		string type = bodyElem->Attribute("type");
+
+		XMLElement* nameElem = bodyElem->FirstChildElement("Name");
+		if (!nameElem || !nameElem->GetText())
+			throw logic_error(string("Missing or empty <Name> in <Body> starting at line "+to_string(bodyElem->GetLineNum())));
+		name = nameElem->GetText();
+
+		vector<double> w, rotcent(3), axis(3);
+		vector<vector<double>> trans;
+
+		XMLElement* rotElem = bodyElem->FirstChildElement("Rotation");
+		if (rotElem) {
+			w = parseDoubles(rotElem->FirstChildElement("W")->GetText());
+			for (double& val : w)
+				val *= M_PI / 180.0;
+			rotcent = SafeGet3Vec(rotElem, "RotCenter", name);
+			axis = SafeGet3Vec(rotElem, "Axis", name);
+		}
+
+		XMLElement* transElem = bodyElem->FirstChildElement("Translations");
+		if (transElem) {
+			for (XMLElement* t = transElem->FirstChildElement("Translation"); t;
+				 t = t->NextSiblingElement("Translation")) {
+				vector<double> tran = parseDoubles(t->GetText());
+				if(tran.size() != 3) throw logic_error(string("Invalid <\"Translation\"> value in "+name +", must be three numbers"));
+				trans.push_back(tran);
+			}
+		}
 
 		if (type == "Sphere") {
-			vector<vector<double>> rot, trans;
-			vector<double> cent(3);
-			vector<double> rotcent(3), axis(3);
-			double rad;
-			size_t trans_size, w_size;
-			for (size_t i = 0; i < 3; i++)
-				iss >> cent[i];
-			iss >> rad;
+			vector<double> cent = SafeGet3Vec( bodyElem, "Center", name);
+			if(cent.size() != 3) throw logic_error(string("Invalid <Center> value in "+name +", must be three numbers"));
 
-			iss >> name;
-			iss >> superbody;
-			iss >> w_size;
-			vector<double> w(w_size);
-			for (size_t i = 0; i < w_size; i++)
-				iss >> w[i];
-			w = w * (M_PI / 180);
-			if (w_size != 0) {
-				for (size_t i = 0; i < 3; i++)
-					iss >> rotcent[i];
-				for (size_t i = 0; i < 3; i++)
-					iss >> axis[i];
-			}
-			iss >> trans_size;
-			for (size_t i = 0; i < trans_size; i++) {
-				vector<double> temp(3);
-				for (size_t j = 0; j < 3; j++) {
-					iss >> temp[j];
-				}
-				trans.push_back(temp);
-			}
+			double rad = atof(bodyElem->FirstChildElement("Radius")->GetText());
+			if(rad <= 0) throw logic_error(string("Invalid value of <Radius> in "+name +", must be a positive number"));
 
 			AddBody(Sphere(cent, rad, name, rotcent, axis, w, trans));
-			if (superbody != "None")
-				Attach(name, superbody);
-		}
+		} 
+		else if (type == "Parallelepiped") {
+			vector<double> cent = SafeGet3Vec( bodyElem, "Center", name);
 
-		if (type == "Parallelepiped") {
-			vector<vector<double>> rot, trans, sides;
-			vector<double> cent(3);
-			vector<double> rotcent(3), axis(3);
-			size_t trans_size, w_size;
-			for (size_t i = 0; i < 3; i++)
-				iss >> cent[i];
-			for (size_t i = 0; i < 3; i++) {
-				vector<double> temp(3);
-				for (size_t j = 0; j < 3; j++) {
-					iss >> temp[j];
-				}
-				sides.push_back(temp);
+			vector<vector<double>> sides;
+			if(!bodyElem->FirstChildElement("Sides"))throw logic_error(string("Missing or empty <Sides> in "+name));
+			for (XMLElement* s = bodyElem->FirstChildElement("Sides")->FirstChildElement("Side"); s;
+				 s = s->NextSiblingElement("Side")) {
+				sides.push_back(parseDoubles(s->GetText()));
 			}
-
-			iss >> name;
-			iss >> superbody;
-			iss >> w_size;
-			vector<double> w(w_size);
-			for (size_t i = 0; i < w_size; i++)
-				iss >> w[i];
-			w = w * (M_PI / 180);
-			if (w_size != 0) {
-				for (size_t i = 0; i < 3; i++)
-					iss >> rotcent[i];
-				for (size_t i = 0; i < 3; i++)
-					iss >> axis[i];
-			}
-			iss >> trans_size;
-			for (size_t i = 0; i < trans_size; i++) {
-				vector<double> temp(3);
-				for (size_t j = 0; j < 3; j++) {
-					iss >> temp[j];
-				}
-				trans.push_back(temp);
-			}
+			if(sides.size() != 3) throw logic_error(string("Invalid number ("+to_string(sides.size())+ ") of <Side> elements in "+name +", must be 3"));
 
 			AddBody(Parallelepiped(cent, sides, name, rotcent, axis, w, trans));
-			if (superbody != "None")
-				Attach(name, superbody);
-		}
+		} 
+		else if (type == "Capsule") {
+			vector<double> l1 = SafeGet3Vec( bodyElem, "L1", name);
+			vector<double> l2 = SafeGet3Vec( bodyElem, "L2", name);
 
-		if (type == "Capsule") {
-			vector<vector<double>> rot, trans;
-			vector<double> cent(3), l1(3), l2(3);
-			vector<double> rotcent(3), axis(3);
-			double rad;
-			size_t trans_size, w_size;
-			for (size_t i = 0; i < 3; i++)
-				iss >> l1[i];
-			for (size_t i = 0; i < 3; i++)
-				iss >> l2[i];
-			iss >> rad;
+			if(bodyElem->FirstChildElement("Radius") == nullptr) throw logic_error(string("Missing value of <Radius> in "+name));
 
-			iss >> name;
-			iss >> superbody;
-			iss >> w_size;
-			vector<double> w(w_size);
-			for (size_t i = 0; i < w_size; i++)
-				iss >> w[i];
-			w = w * (M_PI / 180);
-			if (w_size != 0) {
-				for (size_t i = 0; i < 3; i++)
-					iss >> rotcent[i];
-				for (size_t i = 0; i < 3; i++)
-					iss >> axis[i];
-			}
-			iss >> trans_size;
-			for (size_t i = 0; i < trans_size; i++) {
-				vector<double> temp(3);
-				for (size_t j = 0; j < 3; j++) {
-					iss >> temp[j];
-				}
-				trans.push_back(temp);
-			}
+			double rad = atof(bodyElem->FirstChildElement("Radius")->GetText());
+			if(rad <= 0) throw logic_error(string("Invalid value of <Radius> in "+name +", must be a positive number"));
 
 			AddBody(Capsule(l1, l2, rad, name, rotcent, axis, w, trans));
-			if (superbody != "None")
-				Attach(name, superbody);
+		} 
+		else
+			throw logic_error(string("Missing or invalid Body type in "+name+", must be one of "
+										  "\"Sphere\", \"Parallelepiped\" or \"Capsule\"!"));
+
+		XMLElement* superElement = bodyElem->FirstChildElement("Superbody");
+		if (superElement) {
+			Attach(name, superElement->GetText());
 		}
 	}
-
-	file.close();
 }
 
 // Destructor
@@ -531,7 +482,7 @@ Body* ManyBody::Find(string name) {
 		if (body->GetName() == name)
 			return body;
 
-	cout << name << " not found!" << endl;
+	// cout << name << " not found!" << endl;
 	return nullptr;
 }
 
@@ -545,8 +496,13 @@ void ManyBody::Attach(Body SubBody, string SuperName) {
 void ManyBody::Attach(string SubName, string SuperName) {
 	Body* Super = Find(SuperName);
 	Body* Sub = Find(SubName);
-	if (Super and Sub)
+	if (Super == nullptr)
+		cout << "Warning: Couldn't find SuperBody \"" + SuperName + "\"!" << endl;
+	if (Sub == nullptr)
+		cout << "Warning: Couldn't find SubBody \"" + SubName + "\"!" << endl;
+	if (Super and Sub) {
 		Super->AddSubBody(*Sub);
+	}
 }
 
 // Find smallest bounds containing the object throughout movement, return a vector containing lower

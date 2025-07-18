@@ -2,8 +2,10 @@
 
 #include "body.h"
 #include "ray.h"
+#include "tinyxml2.h"
 
 using namespace std;
+using namespace tinyxml2;
 
 // Projects the Point on a plane perpendicular to v and passing through p
 vector<double> Project(vector<double> Point, vector<double> p, vector<double> v) {
@@ -165,9 +167,9 @@ void PrintDynShadow(vector<double> box, Body& body, vector<double> relvel, doubl
 		body.Move(t);
 		canvas.reset();
 		canvas.BodyProj(body);
-		// string out = outfile + to_string(t) + ".dat";
-		cout << "Printing to " << outfile << endl;
-		canvas.PrintRaysFlat(outfile);
+		string out = outfile + to_string(t) + ".dat";
+		cout << "Printing to " << out << endl;
+		canvas.PrintRaysFlat(out);
 		t += dt;
 	}
 }
@@ -670,7 +672,7 @@ bool AllGood() {
 	vector<double> rainVel = {0.1, 0.2, -1};
 	double vb = 0.5;
 
-	double expected = 0.752264590730204;
+	double expected = 0.755438442320699;
 	double evaluated = Wetness(testBox, testBody, rainVel, vb, dx, tmin, tmax, nstep);
 
 	double epsilon = expected * 1e-10;
@@ -680,4 +682,34 @@ bool AllGood() {
 		 << "Expected test value:  " << expected << "\n"
 		 << "Evaluated test value: " << evaluated << endl;
 	return false;
+}
+
+// Parse a vector of doubles from a string
+vector<double> parseDoubles(const char* text) {
+	vector<double> result;
+	if (text == nullptr)
+		return result;
+	istringstream iss(text);
+	double val;
+	while (iss >> val)
+		result.push_back(val);
+	return result;
+}
+
+// Try to get a vector of three doubles from an XMLElement
+vector<double> SafeGet3Vec(XMLElement* parent, const char* tag, string bodyName) {
+	XMLElement* child = parent->FirstChildElement(tag);
+	if (!child || !child->GetText())
+		throw std::logic_error(string("Missing or empty <" + string(tag) + "> in "+bodyName));
+	vector<double> res = parseDoubles(child->GetText());
+	if(res.size() != 3) throw logic_error(string("Invalid <"+string(tag)+"> value in "+bodyName +", must be 3 numbers"));
+	return res;
+}
+
+// Try to get text from an XMLElement, throw error if it is null
+string SafeGetText(XMLElement* parent, const char* tag) {
+	XMLElement* child = parent->FirstChildElement(tag);
+	if (!child || !child->GetText())
+		throw std::logic_error(string("Missing or empty <") + tag + ">");
+	return string(child->GetText());
 }

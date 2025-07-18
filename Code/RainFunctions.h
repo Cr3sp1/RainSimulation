@@ -11,8 +11,10 @@
 
 #include "VectorOperations.h"
 #include "mins.h"
+#include "tinyxml2.h"
 
 using namespace std;
+using namespace tinyxml2;
 
 // Forward declaration
 class Body;
@@ -157,5 +159,14 @@ void WriteHeadFit(ostream& out, string bodyName, double vmax, double dx, int nst
 
 // Perform a test calcultation and check that results are right
 bool AllGood();
+
+// Parse a vector of doubles from a string
+vector<double> parseDoubles(const char* text);
+
+// Try to get a vector of three doubles from an XMLElement
+vector<double> SafeGet3Vec(XMLElement* parent, const char* tag, string bodyName);
+
+// Try to get text from an XMLElement, throw error if it is null
+string SafeGetText(XMLElement* parent, const char* tag);
 
 #endif

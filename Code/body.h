@@ -47,9 +47,9 @@ class Body {
 	Body(string Name, vector<double> Rotcent, vector<double> Rotax, vector<double> W,
 		 vector<vector<double>> Trans)
 		: name(Name), rotcent(Rotcent), rotax(Rotax), w(W), trans(Trans) {
-			theta = getTheta(0);
-			delta = getDelta(0);
-		}
+		theta = getTheta(0);
+		delta = getDelta(0);
+	}
 	// Virtual destructor
 	virtual ~Body();
 	// Primes the body to be checked. p is a point on the surface containing the ray origins and v
