@@ -14,7 +14,7 @@ Body::~Body() {
 
 // Evaluate theta at a time t
 double Body::getTheta(double t) {
-	double res = 0;
+	double res = theta0;
 	// Add sin terms
 	for (size_t i = 0; 2 * i < w.size(); i++) {
 		res += w[2 * i] * sin(t * (i + 1) * 2 * M_PI);
@@ -28,7 +28,7 @@ double Body::getTheta(double t) {
 
 // Evaluate delta at a time t
 vector<double> Body::getDelta(double t) {
-	vector<double> res = {0, 0, 0};
+	vector<double> res = delta0;
 	// Add sin terms
 	for (size_t i = 0; 2 * i < trans.size(); i++) {
 		res += trans[2 * i] * sin(t * (i + 1) * 2 * M_PI);
@@ -358,19 +358,32 @@ ManyBody::ManyBody(string filename) : Body() {
 
 		XMLElement* nameElem = bodyElem->FirstChildElement("Name");
 		if (!nameElem || !nameElem->GetText())
-			throw logic_error(string("Missing or empty <Name> in <Body> starting at line "+to_string(bodyElem->GetLineNum())));
+			throw logic_error(string("Missing or empty <Name> in <Body> starting at line " +
+									 to_string(bodyElem->GetLineNum())));
 		name = nameElem->GetText();
 
-		vector<double> w, rotcent(3), axis(3);
+		double theta0 = 0;
+		vector<double> w, rotcent(3), axis(3), delta0(3);
 		vector<vector<double>> trans;
 
 		XMLElement* rotElem = bodyElem->FirstChildElement("Rotation");
 		if (rotElem) {
+			XMLElement* wElem = rotElem->FirstChildElement("W");
+			if (!wElem)
+				throw logic_error(string("Missing <W> in <Rotation> in " + name));
 			w = parseDoubles(rotElem->FirstChildElement("W")->GetText());
 			for (double& val : w)
 				val *= M_PI / 180.0;
 			rotcent = SafeGet3Vec(rotElem, "RotCenter", name);
 			axis = SafeGet3Vec(rotElem, "Axis", name);
+			XMLElement* theta0Elem = rotElem->FirstChildElement("Theta0");
+			if (theta0Elem && theta0Elem->GetText()) {
+				vector<double> theta0vals = parseDoubles(theta0Elem->GetText());
+				if (theta0vals.size() != 1)
+					throw logic_error(string("Invalid <Theta0> value in <Rotation> in " + name +
+											 ", must be a single number"));
+				theta0 = theta0vals[0] * M_PI / 180.0;
+			}
 		}
 
 		XMLElement* transElem = bodyElem->FirstChildElement("Translations");
@@ -378,47 +391,65 @@ ManyBody::ManyBody(string filename) : Body() {
 			for (XMLElement* t = transElem->FirstChildElement("Translation"); t;
 				 t = t->NextSiblingElement("Translation")) {
 				vector<double> tran = parseDoubles(t->GetText());
-				if(tran.size() != 3) throw logic_error(string("Invalid <\"Translation\"> value in "+name +", must be three numbers"));
+				if (tran.size() != 3)
+					throw logic_error(string("Invalid <\"Translation\"> value in " + name +
+											 ", must be three numbers"));
 				trans.push_back(tran);
+			}
+			XMLElement* delta0Elem = transElem->FirstChildElement("Delta0");
+			if (delta0Elem && delta0Elem->GetText()) {
+				vector<double> delta0vals = parseDoubles(delta0Elem->GetText());
+				if (delta0vals.size() != 3)
+					throw logic_error(string("Invalid <Delta0> value in <Translations> in " + name +
+											 ", must be 3 number"));
+				delta0 = delta0vals;
 			}
 		}
 
 		if (type == "Sphere") {
-			vector<double> cent = SafeGet3Vec( bodyElem, "Center", name);
-			if(cent.size() != 3) throw logic_error(string("Invalid <Center> value in "+name +", must be three numbers"));
+			vector<double> cent = SafeGet3Vec(bodyElem, "Center", name);
+			if (cent.size() != 3)
+				throw logic_error(
+					string("Invalid <Center> value in " + name + ", must be three numbers"));
 
 			double rad = atof(bodyElem->FirstChildElement("Radius")->GetText());
-			if(rad <= 0) throw logic_error(string("Invalid value of <Radius> in "+name +", must be a positive number"));
+			if (rad <= 0)
+				throw logic_error(
+					string("Invalid value of <Radius> in " + name + ", must be a positive number"));
 
-			AddBody(Sphere(cent, rad, name, rotcent, axis, w, trans));
-		} 
-		else if (type == "Parallelepiped") {
-			vector<double> cent = SafeGet3Vec( bodyElem, "Center", name);
+			AddBody(Sphere(cent, rad, name, rotcent, axis, w, trans, theta0, delta0));
+		} else if (type == "Parallelepiped") {
+			vector<double> cent = SafeGet3Vec(bodyElem, "Center", name);
 
 			vector<vector<double>> sides;
-			if(!bodyElem->FirstChildElement("Sides"))throw logic_error(string("Missing or empty <Sides> in "+name));
+			if (!bodyElem->FirstChildElement("Sides"))
+				throw logic_error(string("Missing or empty <Sides> in " + name));
 			for (XMLElement* s = bodyElem->FirstChildElement("Sides")->FirstChildElement("Side"); s;
 				 s = s->NextSiblingElement("Side")) {
 				sides.push_back(parseDoubles(s->GetText()));
 			}
-			if(sides.size() != 3) throw logic_error(string("Invalid number ("+to_string(sides.size())+ ") of <Side> elements in "+name +", must be 3"));
+			if (sides.size() != 3)
+				throw logic_error(string("Invalid number (" + to_string(sides.size()) +
+										 ") of <Side> elements in " + name + ", must be 3"));
 
-			AddBody(Parallelepiped(cent, sides, name, rotcent, axis, w, trans));
-		} 
-		else if (type == "Capsule") {
-			vector<double> l1 = SafeGet3Vec( bodyElem, "L1", name);
-			vector<double> l2 = SafeGet3Vec( bodyElem, "L2", name);
+			AddBody(Parallelepiped(cent, sides, name, rotcent, axis, w, trans, theta0, delta0));
+		} else if (type == "Capsule") {
+			vector<double> l1 = SafeGet3Vec(bodyElem, "L1", name);
+			vector<double> l2 = SafeGet3Vec(bodyElem, "L2", name);
 
-			if(bodyElem->FirstChildElement("Radius") == nullptr) throw logic_error(string("Missing value of <Radius> in "+name));
+			if (bodyElem->FirstChildElement("Radius") == nullptr)
+				throw logic_error(string("Missing value of <Radius> in " + name));
 
 			double rad = atof(bodyElem->FirstChildElement("Radius")->GetText());
-			if(rad <= 0) throw logic_error(string("Invalid value of <Radius> in "+name +", must be a positive number"));
+			if (rad <= 0)
+				throw logic_error(
+					string("Invalid value of <Radius> in " + name + ", must be a positive number"));
 
-			AddBody(Capsule(l1, l2, rad, name, rotcent, axis, w, trans));
-		} 
-		else
-			throw logic_error(string("Missing or invalid Body type in "+name+", must be one of "
-										  "\"Sphere\", \"Parallelepiped\" or \"Capsule\"!"));
+			AddBody(Capsule(l1, l2, rad, name, rotcent, axis, w, trans, theta0, delta0));
+		} else
+			throw logic_error(string("Missing or invalid Body type in " + name +
+									 ", must be one of "
+									 "\"Sphere\", \"Parallelepiped\" or \"Capsule\"!"));
 
 		XMLElement* superElement = bodyElem->FirstChildElement("Superbody");
 		if (superElement) {

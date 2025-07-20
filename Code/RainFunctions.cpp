@@ -645,15 +645,19 @@ bool AllGood() {
 	double radS = 0.3;
 	vector<double> rotcentS(3), axisS(3), wS;
 	vector<vector<double>> transS = {{0.2, 0.1, 0}, {0., 0.2, 0.1}};
-	testBody.AddBody(Sphere(centS, radS, "testSphere", rotcentS, axisS, wS, transS));
+	vector<double> delta0S = {0., -0.2, -0.1};
+	testBody.AddBody(Sphere(centS, radS, "testSphere", rotcentS, axisS, wS, transS, 0, delta0S));
 
 	vector<double> centP = {0., 0.1, 0.};
 	vector<vector<double>> sidesP = {{0.1, 0, 0}, {0, 0.4, 0}, {0, 0, 0.2}};
 	vector<double> rotcentP = {0., 0.45, 0.};
 	vector<double> axisP = {1., 0., 0.};
 	vector<double> wP = {60., 90.};
+	double w0P = -90;
 	vector<vector<double>> transP = {{0., 0.1, 0.05}, {0., 0.5, 0.1}};
-	testBody.AddBody(Parallelepiped(centP, sidesP, "testPippo", rotcentP, axisP, wP, transP));
+	vector<double> delta0P = {0., -0.5, -0.1};
+	testBody.AddBody(
+		Parallelepiped(centP, sidesP, "testPippo", rotcentP, axisP, wP, transP, w0P, delta0P));
 
 	vector<double> l1 = {0., 0.1, 0.1};
 	vector<double> l2 = {0., 0.0, -0.2};
@@ -661,8 +665,9 @@ bool AllGood() {
 	vector<double> rotcentC = l1;
 	vector<double> axisC = {0., 0., 1};
 	vector<double> wC = {15., 20.};
+	double w0C = -20;
 	vector<vector<double>> transC;
-	testBody.AddBody(Capsule(l1, l2, radC, "testCapsule", rotcentC, axisC, wC, transC));
+	testBody.AddBody(Capsule(l1, l2, radC, "testCapsule", rotcentC, axisC, wC, transC, w0C));
 	testBody.Attach("testCapsule", "testPippo");
 
 	int tmin = 0, tmax = 1, nstep = 10;
@@ -700,9 +705,11 @@ vector<double> parseDoubles(const char* text) {
 vector<double> SafeGet3Vec(XMLElement* parent, const char* tag, string bodyName) {
 	XMLElement* child = parent->FirstChildElement(tag);
 	if (!child || !child->GetText())
-		throw std::logic_error(string("Missing or empty <" + string(tag) + "> in "+bodyName));
+		throw std::logic_error(string("Missing or empty <" + string(tag) + "> in " + bodyName));
 	vector<double> res = parseDoubles(child->GetText());
-	if(res.size() != 3) throw logic_error(string("Invalid <"+string(tag)+"> value in "+bodyName +", must be 3 numbers"));
+	if (res.size() != 3)
+		throw logic_error(
+			string("Invalid <" + string(tag) + "> value in " + bodyName + ", must be 3 numbers"));
 	return res;
 }
 

@@ -63,14 +63,14 @@ int main(int argc, char* argv[]) {
 		 << " vfall, n_vtail = " << n_vtail << "\n";
 	cout << "vcross_min = " << vcross_min << " vfall, vcross_max = " << vcross_max
 		 << " vfall, n_vcross = " << n_vcross << "\n";
-	if( resPath != "None") {
+	if (resPath != "None") {
 		cout << "Printing fit results to " << resPath << "\n";
-	} else{
+	} else {
 		cout << "Not printing fit results\n";
 	}
-	if( fitPath != "None") {
+	if (fitPath != "None") {
 		cout << "Printing fit points to " << fitPath << "\n";
-	} else{
+	} else {
 		cout << "Not printing fit points\n";
 	}
 	cout << "######################################################################################"
@@ -78,15 +78,15 @@ int main(int argc, char* argv[]) {
 		 << endl;
 
 	// Get Body and box
-	ManyBody* body;
-	try{
-		body = new ManyBody(bodyPath);
-	} catch(logic_error e){
-		cout << "Reading the body input file was unsuccessful:" << endl;
-		cout << e.what() << endl;
-		cout << "Interrupting operation prematurely." << endl;
-		return 0;
-	}
+	// ManyBody* body;
+	// try{
+	// 	body = new ManyBody(bodyPath);
+	// } catch(logic_error e){
+	// 	cout << "Reading the body input file was unsuccessful:" << endl;
+	// 	cout << e.what() << endl;
+	// 	cout << "Interrupting operation prematurely." << endl;
+	// 	return 0;
+	// }
 
 	ManyBody Walk = ManyBody("../Bodies/WalkingMan.xml");
 	vector<double> boxW = Walk.GetBox(0, 1, 60, dx);
@@ -100,9 +100,13 @@ int main(int argc, char* argv[]) {
 	ManyBody Straight = ManyBody("../Bodies/StraightMan.xml");
 
 	// // Print dynamic state
-	// PrintDynState(Walk, 0, 1, 60, "../data/Walk/Status/Walk");
-	// PrintDynState(Run, 0, 1, 60, "../data/Run/Status/Run");
-	PrintDynState(Straight, 0, 1, 60, "../data/Straight/Status/Straight");
+	PrintDynState(Walk, 0, 1, 60, "../data/Walk/Status/Walk");
+	cout << "Center walk:" << endl;
+	Print(0.5 * boxW);
+	PrintDynState(Run, 0, 1, 60, "../data/Run/Status/Run");
+	cout << "Center run:" << endl;
+	Print(0.5 * boxR);
+	// PrintDynState(Straight, 0, 1, 60, "../data/Straight/Status/Straight");
 
 	// Print Shadows
 	// PrintDynShadow(boxW, Walk, {0, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/NewWalk_xy");
@@ -123,7 +127,7 @@ int main(int argc, char* argv[]) {
 	// 	WriteHeadRes(outRes, bodyName, vmax, dx, nstep, nfit, dv);
 	// 	outRes << fixed << setprecision(12);
 	// }
-	
+
 	// ofstream outFit;
 	// if(fitPath != "None"){
 	// 	outFit.open(fitPath);

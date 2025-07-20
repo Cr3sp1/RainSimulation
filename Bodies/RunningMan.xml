@@ -1,157 +1,173 @@
 <ManyBody>
     <Body type="Parallelepiped">
         <Name>Torso</Name>
-        <Center>0.7 0.31 1.25</Center>
+        <Center>1 1 1.12</Center>
         <Sides>
-            <Side>0.1386 0 -0.01948</Side>
+            <Side>0.14 0 0</Side>
             <Side>0 0.28 0</Side>
-            <Side>0.07794 0 0.5546</Side>
+            <Side>0 0 0.56</Side>
         </Sides>
+        <Rotation>
+            <Theta0>8</Theta0>
+            <W></W>
+            <RotCenter>1 0.86 1.12</RotCenter>
+            <Axis>0 1 0</Axis>
+        </Rotation>
     </Body>
     <Body type="Capsule">
         <Name>Neck</Name>
         <Superbody>Torso</Superbody>
-        <L1>0.739 0.31 1.527</L1>
-        <L2>0.763 0.31 1.701</L2>
+        <L1>1 1 1.4</L1>
+        <L2>1 1 1.575</L2>
         <Radius>0.07</Radius>
     </Body>
     <Body type="Sphere">
         <Name>Head</Name>
         <Superbody>Neck</Superbody>
-        <Center>0.763 0.31 1.701</Center>
+        <Center>1 1 1.575</Center>
         <Radius>0.105</Radius>
-    </Body>
-    <Body type="Capsule">
-        <Name>ShoulderL</Name>
-        <Superbody>Torso</Superbody>
-        <L1>0.732 0.45 1.478</L1>
-        <L2>0.732 0.52 1.478</L2>
-        <Radius>0.05</Radius>
-    </Body>
-    <Body type="Capsule">
-        <Name>UppArmL</Name>
-        <Superbody>ShoulderL</Superbody>
-        <L1>0.732 0.52 1.478</L1>
-        <L2>0.65 0.52 1.284</L2>
-        <Radius>0.042</Radius>
-        <Rotation>
-            <W>-15</W>
-            <RotCenter>0.732 0.52 1.478</RotCenter>
-            <Axis>0 -1 0</Axis>
-        </Rotation>
-    </Body>
-    <Body type="Capsule">
-        <Name>ForearmL</Name>
-        <Superbody>UppArmL</Superbody>
-        <L1>0.65 0.52 1.284</L1>
-        <L2>1.014 0.52 1.183</L2>
-        <Radius>0.042</Radius>
-        <Rotation>
-            <W>-12.5</W>
-            <RotCenter>0.65 0.52 1.284</RotCenter>
-            <Axis>0 -1 0</Axis>
-        </Rotation>
     </Body>
     <Body type="Capsule">
         <Name>ShoulderR</Name>
         <Superbody>Torso</Superbody>
-        <L1>0.732 0.17 1.478</L1>
-        <L2>0.732 0.1 1.478</L2>
+        <L1>1 0.86 1.35</L1>
+        <L2>1 0.79 1.35</L2>
         <Radius>0.05</Radius>
     </Body>
     <Body type="Capsule">
         <Name>UppArmR</Name>
         <Superbody>ShoulderR</Superbody>
-        <L1>0.732 0.1 1.478</L1>
-        <L2>0.65 0.1 1.284</L2>
+        <L1>1 0.79 1.35</L1>
+        <L2>1 0.79 1.14</L2>
         <Radius>0.042</Radius>
         <Rotation>
+            <Theta0>-15</Theta0>
             <W>15</W>
-            <RotCenter>0.732 0.1 1.478</RotCenter>
+            <RotCenter>1 0.79 1.35</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
     </Body>
     <Body type="Capsule">
         <Name>ForearmR</Name>
         <Superbody>UppArmR</Superbody>
-        <L1>0.65 0.1 1.284</L1>
-        <L2>1.014 0.1 1.183</L2>
+        <L1>1 0.79 1.14</L1>
+        <L2>1 0.79 0.762</L2>
         <Radius>0.042</Radius>
         <Rotation>
+            <Theta0>97.5</Theta0>
             <W>12.5</W>
-            <RotCenter>0.65 0.1 1.284</RotCenter>
+            <RotCenter>1 0.79 1.14</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
     </Body>
     <Body type="Capsule">
-        <Name>ThighL</Name>
+        <Name>ShoulderL</Name>
         <Superbody>Torso</Superbody>
-        <L1>0.661 0.38 0.9727</L1>
-        <L2>0.6757 0.38 0.553</L2>
-        <Radius>0.07</Radius>
-        <Rotation>
-            <W>30</W>
-            <RotCenter>0.661 0.38 0.9727</RotCenter>
-            <Axis>0 -1 0</Axis>
-        </Rotation>
+        <L1>1 1.14 1.35</L1>
+        <L2>1 1.21 1.35</L2>
+        <Radius>0.05</Radius>
     </Body>
     <Body type="Capsule">
-        <Name>CalfL</Name>
-        <Superbody>ThighL</Superbody>
-        <L1>0.6757 0.38 0.553</L1>
-        <L2>0.3419 0.38 0.7304</L2>
+        <Name>UppArmL</Name>
+        <Superbody>ShoulderL</Superbody>
+        <L1>1 1.21 1.35</L1>
+        <L2>1 1.21 1.14</L2>
         <Radius>0.042</Radius>
         <Rotation>
-            <W>0 -52.5</W>
-            <RotCenter>0.6757 0.38 0.553</RotCenter>
+            <Theta0>-15</Theta0>
+            <W>-15</W>
+            <RotCenter>1 1.21 1.35</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
     </Body>
     <Body type="Capsule">
-        <Name>FootL</Name>
-        <Superbody>CalfL</Superbody>
-        <L1>0.3303 0.38 0.751</L1>
-        <L2>0.3207 0.38 0.5672</L2>
-        <Radius>0.028</Radius>
+        <Name>ForearmL</Name>
+        <Superbody>UppArmL</Superbody>
+        <L1>1 1.21 1.14</L1>
+        <L2>1 1.21 0.762</L2>
+        <Radius>0.042</Radius>
         <Rotation>
-            <W>0 27.5</W>
-            <RotCenter>0.3303 0.38 0.751</RotCenter>
+            <Theta0>97.5</Theta0>
+            <W>-12.5</W>
+            <RotCenter>1 1.21 1.14</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
     </Body>
     <Body type="Capsule">
         <Name>ThighR</Name>
         <Superbody>Torso</Superbody>
-        <L1>0.661 0.24 0.9727</L1>
-        <L2>0.6757 0.24 0.553</L2>
+        <L1>1 0.93 0.84</L1>
+        <L2>1 0.93 0.42</L2>
         <Radius>0.07</Radius>
         <Rotation>
-            <W>-30</W>
-            <RotCenter>0.661 0.24 0.9727</RotCenter>
+            <Theta0>7.5</Theta0>
+            <W>-32.5</W>
+            <RotCenter>1 0.93 0.84</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
     </Body>
     <Body type="Capsule">
         <Name>CalfR</Name>
         <Superbody>ThighR</Superbody>
-        <L1>0.6757 0.24 0.553</L1>
-        <L2>0.5907 0.24 0.1847</L2>
+        <L1>1 0.93 0.42</L1>
+        <L2>1 0.93 0.042</L2>
         <Radius>0.042</Radius>
         <Rotation>
+            <Theta0>-67.5</Theta0>
             <W>0 52.5</W>
-            <RotCenter>0.6757 0.24 0.553</RotCenter>
+            <RotCenter>1 0.93 0.42</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
     </Body>
     <Body type="Capsule">
         <Name>FootR</Name>
         <Superbody>CalfR</Superbody>
-        <L1>0.5773 0.24 0.1806</L1>
-        <L2>0.712 0.24 0.05509</L2>
+        <L1>0.986 0.93 0.028</L1>
+        <L2>1.17 0.93 0.028</L2>
         <Radius>0.028</Radius>
         <Rotation>
-            <W>0 -27.5</W>
-            <RotCenter>0.5773 0.24 0.1806</RotCenter>
+            <Theta0>-2.5</Theta0>
+            <W>0 -22.5</W>
+            <RotCenter>0.986 0.93 0.028</RotCenter>
+            <Axis>0 -1 0</Axis>
+        </Rotation>
+    </Body>
+    <Body type="Capsule">
+        <Name>ThighL</Name>
+        <Superbody>Torso</Superbody>
+        <L1>1 1.07 0.84</L1>
+        <L2>1 1.07 0.42</L2>
+        <Radius>0.07</Radius>
+        <Rotation>
+            <Theta0>7.5</Theta0>
+            <W>32.5</W>
+            <RotCenter>1 1.07 0.84</RotCenter>
+            <Axis>0 -1 0</Axis>
+        </Rotation>
+    </Body>
+    <Body type="Capsule">
+        <Name>CalfL</Name>
+        <Superbody>ThighL</Superbody>
+        <L1>1 1.07 0.42</L1>
+        <L2>1 1.07 0.042</L2>
+        <Radius>0.042</Radius>
+        <Rotation>
+            <Theta0>-67.5</Theta0>
+            <W>0 -52.5</W>
+            <RotCenter>1 1.07 0.42</RotCenter>
+            <Axis>0 -1 0</Axis>
+        </Rotation>
+    </Body>
+    <Body type="Capsule">
+        <Name>FootL</Name>
+        <Superbody>CalfL</Superbody>
+        <L1>0.986 1.07 0.028</L1>
+        <L2>1.17 1.07 0.028</L2>
+        <Radius>0.028</Radius>
+        <Rotation>
+            <Theta0>-2.5</Theta0>
+            <W>0 22.5</W>
+            <RotCenter>0.986 1.07 0.028</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
     </Body>
