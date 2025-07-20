@@ -11,8 +11,8 @@ Sphere   1 1 1.575   0.105   Head   Neck   0   0
 Capsule   1 1.14 1.35   1 1.21 1.35   0.05   ShoulderL1   Torso   0   0
 Capsule   1 1.21 1.35   1 1.42 1.35   0.042   UppArmL1   ShoulderL1   0   0
 Capsule   1 1.42 1.35   1 1.798 1.35   0.042   ForearmL1   UppArmL1   0   0
-Capsule   1 0.86 1.35   1 0.79 1.35   0.05   ShoulderR2   Torso   0   0
-Capsule   1 0.79 1.35   1 0.58 1.35   0.042   UppArmR1   ShoulderR2   0   0
+Capsule   1 0.86 1.35   1 0.79 1.35   0.05   ShoulderR1   Torso   0   0
+Capsule   1 0.79 1.35   1 0.58 1.35   0.042   UppArmR1   ShoulderR1   0   0
 Capsule   1 0.58 1.35   1 0.202 1.35   0.042   ForearmR1   UppArmR1   0   0
 Capsule   1 1.07 0.84   1 1.07 0.42   0.07   ThighL1   Torso   0   0
 Capsule   1 1.07 0.42   1 1.07 0.042   0.042   CalfL1   ThighL1   0   0

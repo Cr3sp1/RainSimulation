@@ -97,17 +97,20 @@ int main(int argc, char* argv[]) {
 	ManyBody Run = ManyBody("../Bodies/RunningMan.xml");
 	vector<double> boxR = Run.GetBox(0, 1, 60, dx);
 
+	ManyBody Straight = ManyBody("../Bodies/StraightMan.xml");
+
 	// // Print dynamic state
-	PrintDynState(Walk, 0, 1, 60, "../data/Walk/Status/Walk");
-	PrintDynState(Run, 0, 1, 60, "../data/Run/Status/Run");
+	// PrintDynState(Walk, 0, 1, 60, "../data/Walk/Status/Walk");
+	// PrintDynState(Run, 0, 1, 60, "../data/Run/Status/Run");
+	PrintDynState(Straight, 0, 1, 60, "../data/Straight/Status/Straight");
 
 	// Print Shadows
-	PrintDynShadow(boxW, Walk, {0, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/NewWalk_xy");
-	PrintDynShadow(boxW, Walk, {0, -100, -1}, dx, 0, 1, 60, "../data/Walk/Proj/NewWalk_xz");
-	PrintDynShadow(boxW, Walk, {-100, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/NewWalk_yz");
-	PrintDynShadow(boxR, Run, {0, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/NewRun_xy");
-	PrintDynShadow(boxR, Run, {0, -100, -1}, dx, 0, 1, 60, "../data/Run/Proj/NewRun_xz");
-	PrintDynShadow(boxR, Run, {-100, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/NewRun_yz");
+	// PrintDynShadow(boxW, Walk, {0, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/NewWalk_xy");
+	// PrintDynShadow(boxW, Walk, {0, -100, -1}, dx, 0, 1, 60, "../data/Walk/Proj/NewWalk_xz");
+	// PrintDynShadow(boxW, Walk, {-100, 0, -1}, dx, 0, 1, 60, "../data/Walk/Proj/NewWalk_yz");
+	// PrintDynShadow(boxR, Run, {0, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/NewRun_xy");
+	// PrintDynShadow(boxR, Run, {0, -100, -1}, dx, 0, 1, 60, "../data/Run/Proj/NewRun_xz");
+	// PrintDynShadow(boxR, Run, {-100, 0, -1}, dx, 0, 1, 60, "../data/Run/Proj/NewRun_yz");
 
 	// // Prepare output streams and files
 	// ofstream outRes;
