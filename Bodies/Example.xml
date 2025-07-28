@@ -7,6 +7,7 @@
         <Rotation>
             <Theta0>-15</Theta0>
             <W>15 10 5</W>
+            <WPhi>45 90 0</WPhi>
             <RotCenter>1 0.79 1.35</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
@@ -15,6 +16,7 @@
             <Translation> 6 0 2 </Translation>
             <Translation> 0 0 0 </Translation>
             <Translation> 0 0 1 </Translation>
+            <TransPhi>20 0 45 90</TransPhi>
         </Translations>
     </Body>
 </ManyBody>

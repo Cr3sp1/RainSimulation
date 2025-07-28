@@ -1,4 +1,4 @@
-../Bodies/RunningMan.xml
+../Bodies/Example.xml
 2
 0.01
 50
@@ -7,7 +7,7 @@
 0 0 1
 0 0 1
 None
-none
+None
 
   	ReadInput >> bodyPath;                                  (path to the body input file)
 	ReadInput >> vmax;                                      (maximum velocity if the body, must be float > 0)

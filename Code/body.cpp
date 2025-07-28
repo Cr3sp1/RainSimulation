@@ -414,9 +414,9 @@ ManyBody::ManyBody(string filename) : Body() {
 				trans.push_back(tran);
 			}
 
-			XMLElement* transPhiElem = rotElem->FirstChildElement("TransPhi");
+			XMLElement* transPhiElem = transElem->FirstChildElement("TransPhi");
 			if (!transPhiElem)
-				throw logic_error(string("Missing <transPhi> in <Rotation> in " + name));
+				throw logic_error(string("Missing <TransPhi> in <Translation> in " + name));
 			transPhi = parseDoubles(transPhiElem->GetText());
 			for (double& val : transPhi)
 				val *= M_PI / 180.0;
