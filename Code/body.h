@@ -30,16 +30,20 @@ class Body {
 	// Initial angle of rotation
 	double theta0;
 	// Amplitude of oscillation in radiants (coefficients in fourier series
-	// expansion of periodic motion, structured as [0]sin [1]cos [2]sin ...)
+	// expansion of periodic motion)
 	vector<double> w;
+	// Phases of fourier series expansion of rotation in radiants
+	vector<double> wPhi;
 	// Initial translation
 	vector<double> delta0;
 	// Vectors used for periodic translation in time evolution (coefficients in
 	// sin expasion of periodic motion)
 	vector<vector<double>> trans;
-	// Value of angle of rotation
+	// Phases of fourier series expansion of translation in radiants
+	vector<double> transPhi;
+	// Value of current angle of rotation
 	double theta = 0;
-	// Value of translation
+	// Value of current translation
 	vector<double> delta = {0, 0, 0};
 	// Pointers to all the bodies that move relative to this one
 	vector<Body*> SubBodies;
@@ -49,9 +53,10 @@ class Body {
 	Body(){};
 	// Dynamic constructor
 	Body(string Name, vector<double> Rotcent, vector<double> Rotax, vector<double> W,
-		 vector<vector<double>> Trans, double Theta0 = 0, vector<double> Delta0 = {0, 0, 0})
-		: name(Name), rotcent(Rotcent), rotax(Rotax), theta0(Theta0), w(W), delta0(Delta0),
-		  trans(Trans) {}
+		 vector<double> WPhi, vector<vector<double>> Trans, vector<double> TransPhi,
+		 double Theta0 = 0, vector<double> Delta0 = {0, 0, 0})
+		: name(Name), rotcent(Rotcent), rotax(Rotax), theta0(Theta0), w(W), wPhi(WPhi),
+		  delta0(Delta0), trans(Trans), transPhi(TransPhi) {}
 	// Virtual destructor
 	virtual ~Body();
 	// Primes the body to be checked. p is a point on the surface containing the ray origins and v
@@ -107,10 +112,11 @@ class Sphere : public Body {
 		: Body(), cent(center), rad(radius), rad2(radius * radius) {}
 	// Complete dynamic constructor
 	Sphere(vector<double> center, double radius, string Name, vector<double> Rotcent,
-		   vector<double> Rotax, vector<double> W, vector<vector<double>> Trans, double Theta0 = 0,
+		   vector<double> Rotax, vector<double> W, vector<double> WPhi,
+		   vector<vector<double>> Trans, vector<double> TransPhi, double Theta0 = 0,
 		   vector<double> Delta0 = {0, 0, 0})
-		: Body(Name, Rotcent, Rotax, W, Trans, Theta0, Delta0), cent(center), rad(radius),
-		  rad2(radius * radius) {}
+		: Body(Name, Rotcent, Rotax, W, WPhi, Trans, TransPhi, Theta0, Delta0), cent(center),
+		  rad(radius), rad2(radius * radius) {}
 	// Primes the body to be checked. p is a point on the surface containing the ray origins and v
 	// is the relative velocity
 	void Prime(vector<double> p, vector<double> v) override;
@@ -147,9 +153,10 @@ class Parallelepiped : public Body {
 	// Complete dynamic constructor
 	Parallelepiped(vector<double> Center, vector<vector<double>> Side, string Name,
 				   vector<double> Rotcent, vector<double> Rotax, vector<double> W,
-				   vector<vector<double>> Trans, double Theta0 = 0,
-				   vector<double> Delta0 = {0, 0, 0})
-		: Body(Name, Rotcent, Rotax, W, Trans, Theta0, Delta0), cent(Center), side(Side) {}
+				   vector<double> WPhi, vector<vector<double>> Trans, vector<double> TransPhi,
+				   double Theta0 = 0, vector<double> Delta0 = {0, 0, 0})
+		: Body(Name, Rotcent, Rotax, W, WPhi, Trans, TransPhi, Theta0, Delta0), cent(Center),
+		  side(Side) {}
 	// Primes the body to be checked. p is a point on the surface containing the ray origins and v
 	// is the relative velocity
 	void Prime(vector<double> p, vector<double> v) override;
@@ -186,9 +193,11 @@ class Capsule : public Body {
 		: Body(), l1(L1), l2(L2), rad(Radius) {}
 	// Complete dynamic constructor
 	Capsule(vector<double> L1, vector<double> L2, double Radius, string Name,
-			vector<double> Rotcent, vector<double> Rotax, vector<double> W,
-			vector<vector<double>> Trans, double Theta0 = 0, vector<double> Delta0 = {0, 0, 0})
-		: Body(Name, Rotcent, Rotax, W, Trans, Theta0, Delta0), l1(L1), l2(L2), rad(Radius) {}
+			vector<double> Rotcent, vector<double> Rotax, vector<double> W, vector<double> WPhi,
+			vector<vector<double>> Trans, vector<double> TransPhi, double Theta0 = 0,
+			vector<double> Delta0 = {0, 0, 0})
+		: Body(Name, Rotcent, Rotax, W, WPhi, Trans, TransPhi, Theta0, Delta0), l1(L1), l2(L2),
+		  rad(Radius) {}
 	// Primes the body to be checked. p is a point on the surface containing theray origins and v is
 	// the relative velocity
 	void Prime(vector<double> p, vector<double> v) override;

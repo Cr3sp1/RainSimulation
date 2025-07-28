@@ -1,0 +1,20 @@
+<ManyBody>
+    <Body type="Capsule">
+        <Name>Cap1</Name>
+        <L1>1 0.79 1.35</L1>
+        <L2>1 0.79 1.14</L2>
+        <Radius>0.042</Radius>
+        <Rotation>
+            <Theta0>-15</Theta0>
+            <W>15 10 5</W>
+            <RotCenter>1 0.79 1.35</RotCenter>
+            <Axis>0 -1 0</Axis>
+        </Rotation>
+        <Translations>
+            <Translation> 0 2 2 </Translation>
+            <Translation> 6 0 2 </Translation>
+            <Translation> 0 0 0 </Translation>
+            <Translation> 0 0 1 </Translation>
+        </Translations>
+    </Body>
+</ManyBody>

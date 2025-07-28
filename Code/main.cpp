@@ -79,9 +79,9 @@ int main(int argc, char* argv[]) {
 
 	// Get Body and box
 	ManyBody* body;
-	try{
+	try {
 		body = new ManyBody(bodyPath);
-	} catch(logic_error e){
+	} catch (logic_error e) {
 		cout << "Reading the body input file was unsuccessful:" << endl;
 		cout << e.what() << endl;
 		cout << "Interrupting operation prematurely." << endl;
@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
 
 	// Prepare output streams and files
 	ofstream outRes;
-	if(resPath != "None"){
+	if (resPath != "None") {
 		outRes.open(resPath);
 		if (!outRes) {
 			cerr << "Error opening results output file." << endl;
@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	ofstream outFit;
-	if(fitPath != "None"){
+	if (fitPath != "None") {
 		outFit.open(fitPath);
 		if (!outFit) {
 			cerr << "Error opening results output file." << endl;
@@ -128,14 +128,17 @@ int main(int argc, char* argv[]) {
 			tie(vopt, vopt_std, Rmin, Rmin_std, fitPoints) =
 				MinFit(box, *body, vmax, dx, nstep, vcross_i, vtail_j, nfit, dv);
 
-			if(resPath != "None") outRes << vcross_i << "\t" << vtail_j << "\t" << vopt << "\t" << vopt_std << "\t" << Rmin << "\t" << Rmin_std << endl;
+			if (resPath != "None")
+				outRes << vcross_i << "\t" << vtail_j << "\t" << vopt << "\t" << vopt_std << "\t"
+					   << Rmin << "\t" << Rmin_std << endl;
 
 			// Add vcross_i and vtail_j and to each row and write to file
 			for (size_t i = 0; i < fitPoints.size(); ++i) {
 				fitPoints[i].insert(fitPoints[i].begin(), vtail_j);
 				fitPoints[i].insert(fitPoints[i].begin(), vcross_i);
 			}
-			if(fitPath != "None") Print(outFit, fitPoints, 12);
+			if (fitPath != "None")
+				Print(outFit, fitPoints, 12);
 
 			cout << "Step " << i * n_vtail + j + 1 << "/" << n_vtail * n_vcross << " completed!"
 				 << endl;

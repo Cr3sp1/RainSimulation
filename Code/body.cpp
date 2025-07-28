@@ -15,13 +15,10 @@ Body::~Body() {
 // Evaluate theta at a time t
 double Body::getTheta(double t) {
 	double res = theta0;
-	// Add sin terms
-	for (size_t i = 0; 2 * i < w.size(); i++) {
-		res += w[2 * i] * sin(t * (i + 1) * 2 * M_PI);
-	}
-	// Add cos terms
-	for (size_t i = 0; 2 * i + 1 < w.size(); i++) {
-		res += w[2 * i + 1] * cos(t * (i + 1) * 2 * M_PI);
+	// Add terms
+	int imax = min(w.size(), wPhi.size()) - 1;
+	for (int i = 0; i <= imax; i++) {
+		res += w[i] * sin(2 * M_PI * (i + 1) * t + wPhi[i]);
 	}
 	return res;
 }
@@ -29,13 +26,10 @@ double Body::getTheta(double t) {
 // Evaluate delta at a time t
 vector<double> Body::getDelta(double t) {
 	vector<double> res = delta0;
-	// Add sin terms
-	for (size_t i = 0; 2 * i < trans.size(); i++) {
-		res += trans[2 * i] * sin(t * (i + 1) * 2 * M_PI);
-	}
-	// Add cos terms
-	for (size_t i = 0; 2 * i + 1 < trans.size(); i++) {
-		res += trans[2 * i + 1] * cos(t * (i + 1) * 2 * M_PI);
+	// Add terms
+	int imax = min(trans.size(), transPhi.size()) - 1;
+	for (int i = 0; i <= imax; i++) {
+		res += trans[i] * sin(2 * M_PI * (i + 1) + transPhi[i]);
 	}
 	return res;
 }
@@ -363,19 +357,11 @@ ManyBody::ManyBody(string filename) : Body() {
 		name = nameElem->GetText();
 
 		double theta0 = 0;
-		vector<double> w, rotcent(3), axis(3), delta0(3);
+		vector<double> w, wPhi, rotcent(3), axis(3), delta0(3), transPhi;
 		vector<vector<double>> trans;
 
 		XMLElement* rotElem = bodyElem->FirstChildElement("Rotation");
 		if (rotElem) {
-			XMLElement* wElem = rotElem->FirstChildElement("W");
-			if (!wElem)
-				throw logic_error(string("Missing <W> in <Rotation> in " + name));
-			w = parseDoubles(rotElem->FirstChildElement("W")->GetText());
-			for (double& val : w)
-				val *= M_PI / 180.0;
-			rotcent = SafeGet3Vec(rotElem, "RotCenter", name);
-			axis = SafeGet3Vec(rotElem, "Axis", name);
 			XMLElement* theta0Elem = rotElem->FirstChildElement("Theta0");
 			if (theta0Elem && theta0Elem->GetText()) {
 				vector<double> theta0vals = parseDoubles(theta0Elem->GetText());
@@ -383,19 +369,33 @@ ManyBody::ManyBody(string filename) : Body() {
 					throw logic_error(string("Invalid <Theta0> value in <Rotation> in " + name +
 											 ", must be a single number"));
 				theta0 = theta0vals[0] * M_PI / 180.0;
+
+				XMLElement* wElem = rotElem->FirstChildElement("W");
+				if (!wElem)
+					throw logic_error(string("Missing <W> in <Rotation> in " + name));
+				w = parseDoubles(wElem->GetText());
+				for (double& val : w)
+					val *= M_PI / 180.0;
+
+				XMLElement* wPhiElem = rotElem->FirstChildElement("WPhi");
+				if (!wPhiElem)
+					throw logic_error(string("Missing <WPhi> in <Rotation> in " + name));
+				wPhi = parseDoubles(wPhiElem->GetText());
+				for (double& val : wPhi)
+					val *= M_PI / 180.0;
+				if (w.size() != wPhi.size())
+					throw logic_error(
+						string("<W> and <WPhi> in " + name +
+							   " have a different number of elements, must be equal"));
+
+				rotcent = SafeGet3Vec(rotElem, "RotCenter", name);
+
+				axis = SafeGet3Vec(rotElem, "Axis", name);
 			}
 		}
 
 		XMLElement* transElem = bodyElem->FirstChildElement("Translations");
 		if (transElem) {
-			for (XMLElement* t = transElem->FirstChildElement("Translation"); t;
-				 t = t->NextSiblingElement("Translation")) {
-				vector<double> tran = parseDoubles(t->GetText());
-				if (tran.size() != 3)
-					throw logic_error(string("Invalid <\"Translation\"> value in " + name +
-											 ", must be three numbers"));
-				trans.push_back(tran);
-			}
 			XMLElement* delta0Elem = transElem->FirstChildElement("Delta0");
 			if (delta0Elem && delta0Elem->GetText()) {
 				vector<double> delta0vals = parseDoubles(delta0Elem->GetText());
@@ -404,6 +404,26 @@ ManyBody::ManyBody(string filename) : Body() {
 											 ", must be 3 number"));
 				delta0 = delta0vals;
 			}
+
+			for (XMLElement* t = transElem->FirstChildElement("Translation"); t;
+				 t = t->NextSiblingElement("Translation")) {
+				vector<double> tran = parseDoubles(t->GetText());
+				if (tran.size() != 3)
+					throw logic_error(string("Invalid <\"Translation\"> value in " + name +
+											 ", must be three numbers"));
+				trans.push_back(tran);
+			}
+
+			XMLElement* transPhiElem = rotElem->FirstChildElement("TransPhi");
+			if (!transPhiElem)
+				throw logic_error(string("Missing <transPhi> in <Rotation> in " + name));
+			transPhi = parseDoubles(transPhiElem->GetText());
+			for (double& val : transPhi)
+				val *= M_PI / 180.0;
+			if (trans.size() != transPhi.size())
+				throw logic_error(string(
+					"Number of <Rotation> elements and number of elements in <TransPhi> in " +
+					name + " is different, must be equal"));
 		}
 
 		if (type == "Sphere") {
@@ -417,7 +437,8 @@ ManyBody::ManyBody(string filename) : Body() {
 				throw logic_error(
 					string("Invalid value of <Radius> in " + name + ", must be a positive number"));
 
-			AddBody(Sphere(cent, rad, name, rotcent, axis, w, trans, theta0, delta0));
+			AddBody(
+				Sphere(cent, rad, name, rotcent, axis, w, wPhi, trans, transPhi, theta0, delta0));
 		} else if (type == "Parallelepiped") {
 			vector<double> cent = SafeGet3Vec(bodyElem, "Center", name);
 
@@ -432,7 +453,8 @@ ManyBody::ManyBody(string filename) : Body() {
 				throw logic_error(string("Invalid number (" + to_string(sides.size()) +
 										 ") of <Side> elements in " + name + ", must be 3"));
 
-			AddBody(Parallelepiped(cent, sides, name, rotcent, axis, w, trans, theta0, delta0));
+			AddBody(Parallelepiped(cent, sides, name, rotcent, axis, w, wPhi, trans, transPhi,
+								   theta0, delta0));
 		} else if (type == "Capsule") {
 			vector<double> l1 = SafeGet3Vec(bodyElem, "L1", name);
 			vector<double> l2 = SafeGet3Vec(bodyElem, "L2", name);
@@ -445,7 +467,8 @@ ManyBody::ManyBody(string filename) : Body() {
 				throw logic_error(
 					string("Invalid value of <Radius> in " + name + ", must be a positive number"));
 
-			AddBody(Capsule(l1, l2, rad, name, rotcent, axis, w, trans, theta0, delta0));
+			AddBody(Capsule(l1, l2, rad, name, rotcent, axis, w, wPhi, trans, transPhi, theta0,
+							delta0));
 		} else
 			throw logic_error(string("Missing or invalid Body type in " + name +
 									 ", must be one of "

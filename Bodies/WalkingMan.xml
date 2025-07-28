@@ -37,6 +37,7 @@
         <Rotation>
             <Theta0>7.5</Theta0>
             <W>12.5</W>
+            <WPhi>0</WPhi>
             <RotCenter>1 0.79 1.35</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
@@ -50,6 +51,7 @@
         <Rotation>
             <Theta0>15</Theta0>
             <W>10</W>
+            <WPhi>0</WPhi>
             <RotCenter>1 0.79 1.14</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
@@ -69,7 +71,8 @@
         <Radius>0.042</Radius>
         <Rotation>
             <Theta0>7.5</Theta0>
-            <W>-12.5</W>
+            <W>12.5</W>
+            <WPhi>180</WPhi>
             <RotCenter>1 1.21 1.35</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
@@ -82,7 +85,8 @@
         <Radius>0.042</Radius>
         <Rotation>
             <Theta0>15</Theta0>
-            <W>-10</W>
+            <W>10</W>
+            <WPhi>180</WPhi>
             <RotCenter>1 1.21 1.14</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
@@ -96,6 +100,7 @@
         <Rotation>
             <Theta0>10</Theta0>
             <W>-20</W>
+            <WPhi>180</WPhi>
             <RotCenter>1 0.93 0.84</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
@@ -108,7 +113,8 @@
         <Radius>0.042</Radius>
         <Rotation>
             <Theta0>-30</Theta0>
-            <W>0 30</W>
+            <W>30</W>
+            <WPhi>90</WPhi>
             <RotCenter>1 0.93 0.42</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
@@ -121,7 +127,8 @@
         <Radius>0.028</Radius>
         <Rotation>
             <Theta0>7.5</Theta0>
-            <W>0 -12.5</W>
+            <W>12.5</W>
+            <WPhi>-90</WPhi>
             <RotCenter>0.986 0.93 0.028</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
@@ -135,6 +142,7 @@
         <Rotation>
             <Theta0>10</Theta0>
             <W>20</W>
+            <WPhi>0</WPhi>
             <RotCenter>1 1.07 0.84</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
@@ -147,7 +155,8 @@
         <Radius>0.042</Radius>
         <Rotation>
             <Theta0>-30</Theta0>
-            <W>0 -30</W>
+            <W>30</W>
+            <WPhi>-90</WPhi>
             <RotCenter>1 1.07 0.42</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
@@ -160,7 +169,8 @@
         <Radius>0.028</Radius>
         <Rotation>
             <Theta0>7.5</Theta0>
-            <W>0 12.5</W>
+            <W>12.5</W>
+            <WPhi>90</WPhi>
             <RotCenter>0.986 1.07 0.028</RotCenter>
             <Axis>0 -1 0</Axis>
         </Rotation>
