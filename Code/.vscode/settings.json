@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "iosfwd": "cpp",
+        "iostream": "cpp",
+        "vector": "cpp",
+        "iterator": "cpp",
+        "ostream": "cpp",
+        "*.tcc": "cpp",
+        "limits": "cpp",
+        "type_traits": "cpp",
+        "new": "cpp"
+    }
+}

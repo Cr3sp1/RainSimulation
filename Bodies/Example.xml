@@ -1,0 +1,44 @@
+<ManyBody>
+    <Body type="Capsule">
+        <Name>EgCapsule</Name>
+        <L1>1 0.79 1.35</L1>
+        <L2>1 0.79 1.14</L2>
+        <Radius>0.042</Radius>
+        <Rotation>
+            <Theta0>-15</Theta0>
+            <W>15 10 5</W>
+            <WPhi>45 90 0</WPhi>
+            <RotCenter>1 0.79 1.35</RotCenter>
+            <Axis>0 -1 0</Axis>
+        </Rotation>
+        <Translations>
+            <Translation> 0 2 2 </Translation>
+            <Translation> 6 0 2 </Translation>
+            <Translation> 0 0 0 </Translation>
+            <Translation> 0 0 1 </Translation>
+            <TransPhi>20 0 45 90</TransPhi>
+        </Translations>
+    </Body>
+    <Body type="Sphere">
+        <Name>EgSphere</Name>
+        <Superbody>EgCapsule</Superbody>
+        <Center>1 1 1.575</Center>
+        <Radius>0.105</Radius>
+    </Body>
+    <Body type="Parallelepiped">
+        <Name>EgPippo</Name>
+        <Center>1 1 1.12</Center>
+        <Sides>
+            <Side>0.14 0 0</Side>
+            <Side>0 0.28 0</Side>
+            <Side>0 0 0.56</Side>
+        </Sides>
+        <Rotation>
+            <Theta0>8</Theta0>
+            <W></W>
+            <WPhi></WPhi>
+            <RotCenter>1 0.86 1.12</RotCenter>
+            <Axis>0 1 0</Axis>
+        </Rotation>
+    </Body>
+</ManyBody>

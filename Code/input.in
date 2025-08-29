@@ -1,0 +1,21 @@
+../Bodies/Example.xml
+2
+0.01
+50
+9
+0.006
+0 0 1
+0 0 1
+None
+None
+
+  	ReadInput >> bodyPath;                                  (path to the body input file)
+	ReadInput >> vmax;                                      (maximum velocity if the body, must be float > 0)
+	ReadInput >> dx;                                        (distance between rays, must be float > 0)
+	ReadInput >> nstep;                                     (number of time steps, must be int > 0)
+	ReadInput >> nfit;                                      (number of fit points, must be int > 0)
+	ReadInput >> dv;                                        (number of time steps, must be int > 0)
+	ReadInput >> vcross_min >> vcross_max >> n_vcross;      (range of vcross and number of considered values, n_vcross must be int > 0)
+	ReadInput >> vtail_min >> vtail_max >> n_vtail;         (range of vtail and number of considered values, n_vtail must be int > 0)
+	ReadInput >> resPath;                                   (path to the fit results output file, put None to avoid printing)
+	ReadInput >> fitPath;                                   (path to the fit points output file, put None to avoid printing)

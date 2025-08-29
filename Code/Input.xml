@@ -1,0 +1,12 @@
+<Settings>
+    <BodyPath>../Bodies/RunningMan.xml</BodyPath>   <!--Path to the body input file-->
+    <Vmax>2</Vmax>   <!--Maximum velocity the body allowed to go-->
+    <Dx>0.01</Dx>   <!--Spacial discretization step-->
+    <Nstep>50</Nstep>   <!--Number of time steps-->
+    <Nfit>9</Nfit>   <!--Number of fit points-->
+    <Dv>0.006</Dv>   <!--Distance between fit points-->
+    <Vcross min="0." max="0.5" n="2" />   <!--Crosswind velocity-->
+    <Vtail min="0." max="1" n="3" />    <!--Crosswind velocity-->
+    <ResPath>../Output/example.dat</ResPath>   <!--Path to the results output file (leave empty to avoid printing)-->
+    <FitPath></FitPath>   <!--Path to the fit points output file (leave empty to avoid printing)-->
+</Settings>
