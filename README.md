@@ -2,6 +2,16 @@
 
 This project is a C++ tool to calculate the optimal velocity at which bodies should move through rain to minimize wetness. The program able to estimate how wet a body gets when it travels a straight path under rain at a fixed velocity. It finds a velocity near the minimum using Brent's method and performs a parabolic fit around this point to better estimate the minimum. Bodies are defined in XML files, and simulations are configured through an `Input.xml` file. 
 
+## Associated publication
+
+This repository contains the code used in:
+
+C. A. Crespi, N. Manini, Optimal speed in rain: A numerical model of a dynamically deforming human body, Physics Open (2026) [https://doi.org/10.1016/j.physo.2026.100381](https://doi.org/10.1016/j.physo.2026.100381).
+
+The full article is available locally [here](ARTICLE.pdf).
+
+The exact version of the code used in the publication is available as release version [`v1.0`](https://github.com/Cr3sp1/RainSimulation/releases/tag/v1.0).
+
 ## Installation
 
 Requirements:
